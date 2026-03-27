@@ -6,6 +6,23 @@ on:
       - main
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Ruff format check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check .
+
+      - name: Run Ruff lint check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check .
+
   build:
     runs-on: ubuntu-latest
     outputs:
@@ -46,6 +63,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: app/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
           tags: ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.sha }}
