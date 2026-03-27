@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from repository.test_connection import test_connection
+from db.db import get_db
 
 router = APIRouter(prefix="/api")
 
@@ -10,5 +12,5 @@ def health_check():
 
 
 @router.get("/test-connection", tags=["test-connection"])
-def test_db():
+def test_db(db: Session = Depends(get_db)):
     return test_connection()
