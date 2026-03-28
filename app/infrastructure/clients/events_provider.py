@@ -9,7 +9,7 @@ class EventsProviderClient:
         self.headers = {"x-api-key": api_key}
 
     async def get_by_url(self, url: str) -> EventListPydantic:
-        async with httpx.AsyncClient(base_url=self.base_url) as client:
+        async with httpx.AsyncClient(base_url=self.base_url, timeout=30) as client:
             response = await client.get(url, headers=self.headers)
             response.raise_for_status()
             data = response.json()

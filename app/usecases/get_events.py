@@ -28,10 +28,10 @@ class GetEventsUsecase:
         hostname = os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE")
         data_result = {
             "count": count,
-            "next": f"http://{hostname}/api/events/?page={next_page}"
+            "next": f"{hostname}/api/events/?page={next_page}"
             if next_page - 2 < (count // page_size)
             else None,
-            "previous": f"http://{hostname}/api/events/?page={prev_page}"
+            "previous": f"{hostname}/api/events/?page={prev_page}"
             if prev_page >= 1
             else None,
             "results": result[start:end],
