@@ -8,9 +8,9 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --no-cache
+COPY app/ ./app/
 
-COPY app/ .
+RUN uv sync --frozen --no-cache
 
 RUN chown -R appuser:appuser /app
 
@@ -18,4 +18,4 @@ USER appuser
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "cd /app/app && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"]
