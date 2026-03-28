@@ -1,4 +1,0 @@
-from infrastructure.db.session import get_session
-from infrastructure.clients.events_provider import EventsProviderClient
-from infrastructure.repositories.events import SqlAlchemyEventRepository
-from usecases.get_events import GetEventsUsecase
