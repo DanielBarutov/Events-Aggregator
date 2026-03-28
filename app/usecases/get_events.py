@@ -45,3 +45,11 @@ class GetEventById:
 
     async def execute(self, event_id):
         return await self.repository.get_event(event_id)
+
+
+class GetEventSeats:
+    def __init__(self) -> None:
+        self.repository = EventsRepository(AsyncSessionLocal())
+
+    async def execute(self, event_id):
+        return await self.repository.get_event_seats(event_id)
