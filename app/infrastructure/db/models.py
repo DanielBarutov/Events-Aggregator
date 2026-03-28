@@ -15,12 +15,14 @@ class Place(Base):
     city = Column(String, nullable=True)
     address = Column(String, nullable=True)
     seats_pattern = Column(String, nullable=True)
-    changed_at = Column(DateTime(timezone=True), onupdate=datetime.now,
-                        nullable=True, default=datetime.now)
-    created_at = Column(DateTime(timezone=True),
-                        nullable=False, default=datetime.now)
-    events = relationship("Event", back_populates="place",
-                          cascade="all, delete-orphan")
+    changed_at = Column(
+        DateTime(timezone=True),
+        onupdate=datetime.now,
+        nullable=True,
+        default=datetime.now,
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now)
+    events = relationship("Event", back_populates="place", cascade="all, delete-orphan")
 
 
 class Event(Base):
@@ -32,20 +34,29 @@ class Event(Base):
     registration_deadline = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=True)
     number_of_visitors = Column(Integer, nullable=True)
-    changed_at = Column(DateTime(timezone=True), onupdate=datetime.now,
-                        nullable=True, default=datetime.now)
-    created_at = Column(DateTime(timezone=True),
-                        nullable=False, default=datetime.now)
+    changed_at = Column(
+        DateTime(timezone=True),
+        onupdate=datetime.now,
+        nullable=True,
+        default=datetime.now,
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now)
     status_changed_at = Column(
-        DateTime(timezone=True), onupdate=datetime.now, nullable=True, default=datetime.now)
+        DateTime(timezone=True),
+        onupdate=datetime.now,
+        nullable=True,
+        default=datetime.now,
+    )
     place = relationship("Place", back_populates="events")
 
 
 class SyncStatus(Base):
     __tablename__ = "sync_status"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    last_sync_time = Column(DateTime(timezone=True),
-                            nullable=False, default=datetime.now)
-    last_changed_at = Column(DateTime(timezone=True),
-                             nullable=False, default=datetime.now)
+    last_sync_time = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.now
+    )
+    last_changed_at = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.now
+    )
     sync_status = Column(String, nullable=False)

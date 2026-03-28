@@ -14,5 +14,5 @@ class EventsPaginator:
             raise StopAsyncIteration
 
         data = await self.client.get_by_url(self.next_page_url)
-        self.next_page_url = data.get('next')
-        return data.get('results', [])
+        self.next_page_url = data.get("next")
+        return data.get("results", [])
