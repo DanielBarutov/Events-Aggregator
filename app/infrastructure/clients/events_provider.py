@@ -1,6 +1,6 @@
 import httpx
 
-from app.shemas.event import EventListPydantic
+from shemas.event import EventListPydantic
 
 
 class EventsProviderClient:

@@ -1,5 +1,5 @@
-from app.infrastructure.db.models import Event as EventModel, Place as PlaceModel
-from app.shemas.sync import SyncEventPydantic, SyncPlacePydantic
+from infrastructure.db.models import Event as EventModel, Place as PlaceModel
+from shemas.sync import SyncEventPydantic, SyncPlacePydantic
 
 
 class EventsMapper:
@@ -7,7 +7,8 @@ class EventsMapper:
         self.event_list = event_list
 
     def map_events(self) -> list[EventModel]:
-        events = [SyncEventPydantic.model_validate(event) for event in self.event_list]
+        events = [SyncEventPydantic.model_validate(
+            event) for event in self.event_list]
         return [
             EventModel(
                 id=event.id,
