@@ -7,7 +7,7 @@ import os
 router = APIRouter(tags=["sync"])
 
 
-@router.get("/trigger")
+@router.post("/trigger")
 async def trigger_sync():
     usecase = SyncEventsUsecase(
         EventsProviderClient(

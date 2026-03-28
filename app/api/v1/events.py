@@ -1,12 +1,16 @@
 from fastapi import APIRouter
-
-from shemas.event import EventPydantic
+from datetime import date
+from shemas.event import EventPaginationPydantic
 from usecases.get_events import GetEventsUsecase
 
 router = APIRouter(tags=["events"])
 
 
-@router.get("/events_all", response_model=list[EventPydantic])
-async def get_all_events():
+@router.get("/events", response_model=EventPaginationPydantic)
+async def get_events(
+    data_from: date | None = None,
+    page: int = 1,
+    page_size: int = 20,
+):
     usecase = GetEventsUsecase()
-    return await usecase.execute()
+    return await usecase.execute(data_from, page, page_size)

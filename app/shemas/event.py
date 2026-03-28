@@ -1,5 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel
+from zoneinfo import ZoneInfo
+from pydantic import BaseModel, ConfigDict, field_validator
+
+MSK_TZ = ZoneInfo("Europe/Moscow")
 
 
 class PlacePydantic(BaseModel):
@@ -17,6 +20,13 @@ class EventPydantic(BaseModel):
     registration_deadline: datetime
     status: str
     number_of_visitors: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("event_time", "registration_deadline", mode="before")
+    @classmethod
+    def format_to_msk(cls, v):
+        return v.astimezone(MSK_TZ).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 class EventListPydantic(BaseModel):
