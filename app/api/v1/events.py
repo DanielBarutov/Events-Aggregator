@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.shemas.event import EventPydantic
-from app.usecases.get_events import GetEventsUsecase
+from shemas.event import EventPydantic
+from usecases.get_events import GetEventsUsecase
 
 router = APIRouter(tags=["events"])
 

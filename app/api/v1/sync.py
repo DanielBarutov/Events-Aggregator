@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.infrastructure.clients.events_provider import EventsProviderClient
-from app.usecases.sync_events import SyncEventsUsecase
+from infrastructure.clients.events_provider import EventsProviderClient
+from usecases.sync_events import SyncEventsUsecase
 import os
 
 router = APIRouter(tags=["sync"])
