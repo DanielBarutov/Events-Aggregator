@@ -8,24 +8,20 @@ class EventsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_events(self) -> list[Event]:
-        result = await self.session.execute(select(Event))
-        return list(result.scalars().all())
+    async def get_event(self, event_id) -> Event:
+        result = await self.session.execute(
+            select(Event)
+            .where(Event.id == event_id)
+            .join(Place)
+            .options(selectinload(Event.place))
+        )
+        return result.scalar()
 
     async def get_events_with_places(self) -> list[Event]:
         result = await self.session.execute(
             select(Event).join(Place).options(selectinload(Event.place))
         )
         return list(result.scalars().all())
-
-    async def create_events(self, events: list[Event]):
-        self.session.add_all(events)
-        await self.session.commit()
-
-    async def update_events(self, events: list[Event]):
-        for event in events:
-            await self.session.merge(event)
-        await self.session.commit()
 
     async def delete_events(self, events: list[Event]):
         for event in events:

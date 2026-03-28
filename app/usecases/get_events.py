@@ -37,3 +37,11 @@ class GetEventsUsecase:
             "results": result[start:end],
         }
         return data_result
+
+
+class GetEventById:
+    def __init__(self) -> None:
+        self.repository = EventsRepository(AsyncSessionLocal())
+
+    async def execute(self, event_id):
+        return await self.repository.get_event(event_id)

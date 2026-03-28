@@ -13,8 +13,5 @@ class EventsProviderClient:
             response = await client.get(url, headers=self.headers)
             response.raise_for_status()
             data = response.json()
-            # if data["next"]:
-            #    data["next"] = data["next"].replace("http", "https")
-            # if data["previous"]:
-            #    data["previous"] = data["previous"].replace("http", "https")
+
             return data
