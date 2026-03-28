@@ -16,9 +16,7 @@ elif db_url.startswith("postgresql://") and "+asyncpg" not in db_url:
 engine = create_async_engine(db_url)
 print(db_url)
 AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False
+    bind=engine, class_=AsyncSession, expire_on_commit=False
 )
 
 

@@ -16,5 +16,7 @@ def health_check():
 
 
 @router.get("/test-connection", tags=["test-connection"])
-async def test_db(test_connection_repo: TestConnectionRepository = Depends(get_test_connection_repo)):
+async def test_db(
+    test_connection_repo: TestConnectionRepository = Depends(get_test_connection_repo),
+):
     return await test_connection_repo.test_connection()

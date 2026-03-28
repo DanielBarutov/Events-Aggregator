@@ -10,6 +10,10 @@ class TestConnectionRepository:
     async def test_connection(self):
         try:
             result = await self.session.execute(text("SELECT 1"))
-            return {"status": "ok", "message": "Connection successful", "result": result.scalar()}
+            return {
+                "status": "ok",
+                "message": "Connection successful",
+                "result": result.scalar(),
+            }
         except Exception as e:
             return {"status": "error", "message": "Connection failed", "error": str(e)}
