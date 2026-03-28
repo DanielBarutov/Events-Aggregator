@@ -2,10 +2,13 @@ from contextlib import asynccontextmanager
 
 import asyncio
 
+from dotenv import load_dotenv
 from api.router import router
 from fastapi import FastAPI
 
 from service.sync_worker import run_sync_loop
+
+load_dotenv()
 
 
 class _SyncLoopUsecaseStub:

@@ -1,0 +1,48 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from infrastructure.db.models import Event, Place
+
+
+class EventsRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_events(self) -> list[Event]:
+        result = await self.session.execute(select(Event))
+        return list(result.scalars().all())
+
+    async def get_events_with_places(self) -> list[Event]:
+        result = await self.session.execute(
+            select(Event).join(Place).options(selectinload(Event.place))
+        )
+        return list(result.scalars().all())
+
+    async def create_events(self, events: list[Event]):
+        self.session.add_all(events)
+        await self.session.commit()
+
+    async def update_events(self, events: list[Event]):
+        for event in events:
+            await self.session.merge(event)
+        await self.session.commit()
+
+    async def delete_events(self, events: list[Event]):
+        for event in events:
+            await self.session.delete(event)
+        await self.session.commit()
+
+    async def get_last_changed_at(self):
+        result = await self.session.execute(
+            select(Event.changed_at).order_by(Event.changed_at.desc()).limit(1)
+        )
+        return result.scalar()
+
+    async def upsert_places_and_events(
+        self, places: list[Place], events: list[Event]
+    ) -> None:
+        for p in places:
+            await self.session.merge(p)
+        for e in events:
+            await self.session.merge(e)
+        await self.session.commit()
