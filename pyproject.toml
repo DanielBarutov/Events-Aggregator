@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "dotenv>=0.9.9",
     "fastapi>=0.135.2",
+    "httpx>=0.28.1",
     "postgres>=4.0",
     "pydantic>=2.12.5",
     "pytest>=9.0.2",
