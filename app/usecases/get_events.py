@@ -1,6 +1,4 @@
 from datetime import date
-
-from sqlalchemy import exc
 from infrastructure.db.session import AsyncSessionLocal
 from repository.events import EventsRepository
 from utils.generator_seats import GeneratorAvSeats
