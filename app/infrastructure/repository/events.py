@@ -26,7 +26,7 @@ class EventsRepository:
     async def get_event_seats(self, event_id) -> Event:
         result = await self.session.execute(
             select(Event)
-            .where(Event.id == event_id)
+            .where(Event.id == event_id, Event.status == "published")
             .join(Place)
             .options(selectinload(Event.place))
         )

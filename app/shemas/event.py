@@ -10,6 +10,7 @@ class PlacePydantic(BaseModel):
     name: str
     city: str
     address: str
+    seats_pattern: str
 
 
 class EventPydantic(BaseModel):

@@ -1,4 +1,6 @@
 from datetime import date
+
+from sqlalchemy import exc
 from infrastructure.db.session import AsyncSessionLocal
 from repository.events import EventsRepository
 from utils.generator_seats import GeneratorAvSeats
@@ -53,12 +55,17 @@ class GetEventSeatsUsecase:
         self.repository = EventsRepository(AsyncSessionLocal())
 
     async def execute(self, event_id):
-        data_pattern = await self.repository.get_event_seats(event_id)
-        data_locked_seats = await self.repository.get_locked_seats(event_id)
-        seats_pattern = data_pattern.seats_pattern
-        all_seats = GeneratorAvSeats().generate(seats_pattern)
-        if data_locked_seats:
-            available_seats = GeneratorAvSeats().filter(all_seats, data_locked_seats)
-        else:
-            available_seats = all_seats
-        return {"event_id": event_id, "available_seats": available_seats}
+        try:
+            data_pattern = await self.repository.get_event_seats(event_id)
+            data_locked_seats = await self.repository.get_locked_seats(event_id)
+            seats_pattern = data_pattern.seats_pattern
+            all_seats = GeneratorAvSeats().generate(seats_pattern)
+            if data_locked_seats:
+                available_seats = GeneratorAvSeats().filter(
+                    all_seats, data_locked_seats
+                )
+            else:
+                available_seats = all_seats
+            return {"event_id": event_id, "available_seats": available_seats}
+        except Exception as e:
+            return e
