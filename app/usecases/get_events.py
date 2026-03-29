@@ -1,5 +1,5 @@
 from datetime import date
-from app.infrastructure.cache.memory import MemoryCache
+from infrastructure.cache.memory import MemoryCache
 from utils.generator_seats import GeneratorAvSeats
 import os
 
