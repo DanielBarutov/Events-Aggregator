@@ -1,6 +1,7 @@
 from datetime import date
 from infrastructure.db.session import AsyncSessionLocal
 from repository.events import EventsRepository
+from utils.generator_seats import GeneratorAvSeats
 import os
 
 
@@ -39,7 +40,7 @@ class GetEventsUsecase:
         return data_result
 
 
-class GetEventById:
+class GetEventByIdUsecase:
     def __init__(self) -> None:
         self.repository = EventsRepository(AsyncSessionLocal())
 
@@ -47,9 +48,17 @@ class GetEventById:
         return await self.repository.get_event(event_id)
 
 
-class GetEventSeats:
+class GetEventSeatsUsecase:
     def __init__(self) -> None:
         self.repository = EventsRepository(AsyncSessionLocal())
 
     async def execute(self, event_id):
-        return await self.repository.get_event_seats(event_id)
+        data_pattern = await self.repository.get_event_seats(event_id)
+        data_locked_seats = await self.repository.get_locked_seats(event_id)
+        seats_pattern = data_pattern.seats_pattern
+        all_seats = GeneratorAvSeats().generate(seats_pattern)
+        if data_locked_seats:
+            available_seats = GeneratorAvSeats().filter(all_seats, data_locked_seats)
+        else:
+            available_seats = all_seats
+        return {"event_id": event_id, "available_seats": available_seats}

@@ -23,14 +23,21 @@ class EventsRepository:
         )
         return list(result.scalars().all())
 
-    async def get_events_seats(self, event_id):
+    async def get_event_seats(self, event_id) -> Event:
         result = await self.session.execute(
             select(Event)
             .where(Event.id == event_id)
             .join(Place)
             .options(selectinload(Event.place))
         )
-        return result.scalar()  # На завтра Дальше с ним отработать и создать ручку
+        data = result.scalar().place
+        return data  # На завтра Дальше с ним отработать и создать ручку
+
+    async def get_locked_seats(self, event_id):
+        result = await self.session.execute(
+            select(Event.seats).where(Event.id == event_id)
+        )
+        return result.scalar()
 
     async def delete_events(self, events: list[Event]):
         for event in events:
