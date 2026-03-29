@@ -13,4 +13,5 @@ class EventsProviderClient:
             response = await client.get(url, headers=self.headers)
             response.raise_for_status()
             data = response.json()
+
             return data
