@@ -8,7 +8,7 @@ from usecases.get_events import (
     GetEventByIdUsecase,
     GetEventSeatsUsecase,
 )
-import os
+
 from infrastructure.clients.events_provider import EventsProviderClient
 
 
