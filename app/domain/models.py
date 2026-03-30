@@ -3,24 +3,26 @@ from datetime import datetime
 
 
 @dataclass
-class Place:
+class PlaceEntity:
     id: str
     name: str
     city: str
     address: str
     seats_pattern: str
-    created_at: datetime
     changed_at: datetime
+    created_at: datetime
 
 
 @dataclass
-class Event:
+class EventEntity:
     id: str
+    name: str
     place_id: str
+    place: PlaceEntity
     event_time: datetime
     registration_deadline: datetime
     status: str
     number_of_visitors: int
-    created_at: datetime
     changed_at: datetime
+    created_at: datetime
     status_changed_at: datetime

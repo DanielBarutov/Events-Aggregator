@@ -1,4 +1,5 @@
 from datetime import date
+
 from infrastructure.cache.memory import MemoryCache
 from utils.generator_seats import GeneratorAvSeats
 import os
@@ -7,7 +8,7 @@ cache = MemoryCache()
 
 
 class GetEventsUsecase:
-    def __init__(self, repository):
+    def __init__(self, repository) -> None:
         self.repository = repository
 
     async def execute(self, data_from: date, page: int, page_size: int):
@@ -49,17 +50,10 @@ class GetEventSeatsUsecase:
         self.cache = cache
 
     async def execute(self, event_id):
-        cache_result = self.cache.get("EventSeatsUsecase")
-        if cache_result is not None:
-            return cache_result
-        data_pattern = await self.repository.get_event_seats(event_id)
-        data_locked_seats = await self.repository.get_locked_seats(event_id)
+        data_pattern = await self.repository.get_place(event_id)
         seats_pattern = data_pattern.seats_pattern
         all_seats = GeneratorAvSeats().generate(seats_pattern)
-        if data_locked_seats:
-            available_seats = GeneratorAvSeats().filter(all_seats, data_locked_seats)
-        else:
-            available_seats = all_seats
+
+        available_seats = all_seats
         result = {"event_id": event_id, "available_seats": available_seats}
-        self.cache.set("EventSeatsUsecase", result, 30)
         return result  ##Баг в кешировании я кеширую один и тот же event_id и при смене event_id получу старые данные пока не сгрузится кеш

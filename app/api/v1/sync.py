@@ -1,19 +1,12 @@
-from fastapi import APIRouter
-
-from infrastructure.clients.events_provider import EventsProviderClient
+from fastapi import APIRouter, Depends
+from api.deps import manual_trigger_sync
 from usecases.sync_events import SyncEventsUsecase
-import os
+
 
 router = APIRouter(tags=["sync"])
 
 
 @router.post("/sync/trigger")
-async def trigger_sync():
-    usecase = SyncEventsUsecase(
-        EventsProviderClient(
-            base_url=os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE"),
-            api_key=os.getenv("EVENTS_PROVIDER_API_KEY"),
-        )
-    )
+async def trigger_sync(usecase: SyncEventsUsecase = Depends(manual_trigger_sync)):
     await usecase.execute()
     return {"status": "sync manual triggered successfully"}

@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from sqlalchemy import String, Integer, ForeignKey, Column, DateTime, JSON
+from sqlalchemy import String, Integer, ForeignKey, Column, DateTime
 from sqlalchemy.orm import DeclarativeBase, relationship
 from zoneinfo import ZoneInfo
 
@@ -50,7 +50,6 @@ class Event(Base):
     )
     status = Column(String, nullable=True)
     number_of_visitors = Column(Integer, nullable=True)
-    seats = Column(JSON, nullable=True)
     changed_at = Column(
         DateTime(timezone=True),
         onupdate=lambda: datetime.now(timezone_msk),

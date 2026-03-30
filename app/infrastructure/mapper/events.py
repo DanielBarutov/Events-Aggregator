@@ -1,4 +1,4 @@
-from infrastructure.db.models import Event as EventModel, Place as PlaceModel
+from domain.models import PlaceEntity, EventEntity
 from shemas.sync import SyncEventPydantic, SyncPlacePydantic
 
 
@@ -6,18 +6,21 @@ class EventsMapper:
     def __init__(self, event_list):
         self.event_list = event_list
 
-    def map_events(self) -> list[EventModel]:
+    def map_events(self) -> list[EventEntity]:
         events = [SyncEventPydantic.model_validate(event) for event in self.event_list]
         return [
-            EventModel(
+            EventEntity(
                 id=event.id,
                 name=event.name,
+                place_id=event.place.id,
                 event_time=event.event_time,
                 registration_deadline=event.registration_deadline,
                 status=event.status,
                 number_of_visitors=event.number_of_visitors,
                 status_changed_at=event.status_changed_at,
-                place=PlaceModel(
+                changed_at=event.changed_at,
+                created_at=event.created_at,
+                place=PlaceEntity(
                     id=event.place.id,
                     name=event.place.name,
                     city=event.place.city,
@@ -32,13 +35,13 @@ class EventsMapper:
             for event in events
         ]
 
-    def map_places(self) -> list[PlaceModel]:
+    def map_places(self) -> list[PlaceEntity]:
         places = [
             SyncPlacePydantic.model_validate(event["place"])
             for event in self.event_list
         ]
         return [
-            PlaceModel(
+            PlaceEntity(
                 id=place.id,
                 name=place.name,
                 city=place.city,

@@ -1,20 +1,18 @@
-from infrastructure.db.session import AsyncSessionLocal
-from repository.events import EventsRepository
 from utils.pagination import EventsPaginator
 from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.mapper.events import EventsMapper
 
 
 class SyncEventsUsecase:
-    def __init__(self, client: EventsProviderClient):
+    def __init__(self, client: EventsProviderClient, repository):
         self.client = client
-        self.repository = EventsRepository(AsyncSessionLocal())
+        self.repository = repository
 
     async def execute(self):
         paginator = EventsPaginator(self.client)
         async for events in paginator:
-            await self.repository.upsert_places_and_events(
-                EventsMapper(events).map_events(), EventsMapper(events).map_places()
+            await self.repository.sync(
+                EventsMapper(events).map_places(), EventsMapper(events).map_events()
             )
 
     async def get_last_sync_time(self):

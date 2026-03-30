@@ -15,3 +15,6 @@ class EventsProviderClient:
             data = response.json()
 
             return data
+
+    # async def get_available_seats(self, event_id):
+    # async with
