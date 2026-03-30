@@ -39,8 +39,5 @@ def get_event_seats_usecase(
 def manual_trigger_sync(
     repository: EventsRepository = Depends(get_events_repository),
 ) -> SyncEventsUsecase:
-    client = EventsProviderClient(
-        base_url=os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE"),
-        api_key=os.getenv("EVENTS_PROVIDER_API_KEY"),
-    )
+    client = EventsProviderClient()
     return SyncEventsUsecase(client, repository)

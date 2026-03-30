@@ -1,7 +1,7 @@
 from datetime import date
 
+from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.cache.memory import MemoryCache
-from utils.generator_seats import GeneratorAvSeats
 import os
 
 cache = MemoryCache()
@@ -48,12 +48,13 @@ class GetEventSeatsUsecase:
     def __init__(self, repository) -> None:
         self.repository = repository
         self.cache = cache
+        self.client = EventsProviderClient()
 
     async def execute(self, event_id):
-        data_pattern = await self.repository.get_place(event_id)
-        seats_pattern = data_pattern.seats_pattern
-        all_seats = GeneratorAvSeats().generate(seats_pattern)
-
-        available_seats = all_seats
-        result = {"event_id": event_id, "available_seats": available_seats}
-        return result  ##Баг в кешировании я кеширую один и тот же event_id и при смене event_id получу старые данные пока не сгрузится кеш
+        event = await GetEventByIdUsecase(self.repository).execute(event_id)
+        if event and event.status == "published":
+            available_seats = await self.client.get_available_seats(event_id)
+            result = {"event_id": event_id, "available_seats": available_seats}
+        else:
+            result = {"пока такая 404"}
+        return result
