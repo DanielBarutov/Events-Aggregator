@@ -1,7 +1,9 @@
+from httpx import request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from infrastructure.db.models import Event, Place
+from datetime import date
 
 
 class EventsRepository:
@@ -17,9 +19,13 @@ class EventsRepository:
         )
         return result.scalar()
 
-    async def get_events_with_places(self) -> list[Event]:
+    async def get_events_with_places(self, date: date | None = None) -> list[Event]:
+        if date is not None:
+            req = select(Event).where(Event.event_time >= date)
+        else:
+            req = select(Event)
         result = await self.session.execute(
-            select(Event).join(Place).options(selectinload(Event.place))
+            req.join(Place).options(selectinload(Event.place))
         )
         return list(result.scalars().all())
 

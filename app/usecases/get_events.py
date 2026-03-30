@@ -11,15 +11,9 @@ class GetEventsUsecase:
         self.repository = repository
 
     async def execute(self, data_from: date, page: int, page_size: int):
-        result = await self.repository.get_events_with_places()
-        sorted_result = sorted(result, key=lambda x: x.event_time)
-        if data_from:
-            format_result = [
-                x for x in sorted_result if x.event_time.date() >= data_from
-            ]
-            return self.get_paginated_result(format_result, page, page_size)
-        else:
-            return self.get_paginated_result(sorted_result, page, page_size)
+        result = await self.repository.get_events_with_places(data_from)
+        sorted_result = sorted(result, key=lambda x: x.event_time, reverse=True)
+        return self.get_paginated_result(sorted_result, page, page_size)
 
     def get_paginated_result(self, result: list, page: int, page_size: int):
         start = (page - 1) * page_size
@@ -68,4 +62,4 @@ class GetEventSeatsUsecase:
             available_seats = all_seats
         result = {"event_id": event_id, "available_seats": available_seats}
         self.cache.set("EventSeatsUsecase", result, 30)
-        return result
+        return result  ##Баг в кешировании я кеширую один и тот же event_id и при смене event_id получу старые данные пока не сгрузится кеш
