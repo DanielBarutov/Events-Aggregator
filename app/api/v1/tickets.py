@@ -7,7 +7,9 @@ router = APIRouter(tags=["tickets"])
 
 
 @router.post(
-    "/tickets", status_code=status.HTTP_201_CREATED, response_model=TicketCreateResponse
+    "/tickets/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=TicketCreateResponse,
 )
 async def create_tickets(
     event_id: str,
@@ -21,7 +23,7 @@ async def create_tickets(
     return await usecase.create(event_id, first_name, last_name, email, seat)
 
 
-@router.delete("/tickets/{ticket_id}")
+@router.delete("/tickets/{ticket_id}/")
 async def delete_ticket(
     ticket_id: str,
     usecase: TicketUsecase = Depends(get_tickets_usecase),
