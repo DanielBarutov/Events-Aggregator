@@ -16,7 +16,14 @@ class EventsProviderClient:
             response = await client.get(url, headers=self.headers)
             response.raise_for_status()
             data = response.json()
-
+            # Для локального тестирования:
+            local_test = 0
+            if local_test == 1:
+                if data["next"]:
+                    data["next"] = data["next"].replace("http", "https")
+                if data["previous"]:
+                    data["previous"] = data["previous"].replace("http", "https")
+            # Конец
             return data
 
     async def get_available_seats(self, event_id: str):

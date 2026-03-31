@@ -14,6 +14,7 @@ async def create_tickets(
     seat: str,
     usecase: TicketUsecase = Depends(get_tickets_usecase),
 ):
+    print("При создании тикета указано:", event_id, first_name, last_name, email, seat)
     return await usecase.create(event_id, first_name, last_name, email, seat)
 
 
@@ -22,4 +23,5 @@ async def delete_ticket(
     ticket_id: str,
     usecase: TicketUsecase = Depends(get_tickets_usecase),
 ):
+    print("При удаление тикета:", ticket_id)
     return await usecase.delete(ticket_id)
