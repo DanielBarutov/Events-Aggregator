@@ -34,3 +34,21 @@ class SyncStatusEntity:
     last_sync_time: datetime
     last_changed_at: datetime
     sync_status: str
+
+
+@dataclass
+class UserEntity:
+    id: str
+    email: str
+    first_name: str
+    last_name: str
+    created_at: datetime
+
+
+@dataclass
+class TicketEntity:
+    id: str
+    user_id: str
+    event_id: str
+    seat: str
+    created_at: datetime

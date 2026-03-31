@@ -16,6 +16,7 @@ class EventsProviderClient:
             response = await client.get(url, headers=self.headers)
             response.raise_for_status()
             data = response.json()
+
             return data
 
     async def get_available_seats(self, event_id: str):
@@ -25,3 +26,33 @@ class EventsProviderClient:
             response.raise_for_status()
             data = response.json()
             return data["seats"]
+
+    def create_ticket(
+        self, event_id: str, first_name: str, last_name: str, email: str, seat: str
+    ):
+        with httpx.Client(base_url=self.base_url) as client:
+            url = f"{self.base_url}/api/events/{event_id}/register/"
+            response = client.post(
+                url,
+                headers=self.headers,
+                json={
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "seat": seat,
+                    "email": email,
+                },
+            )
+            response.raise_for_status()
+            return response.json()
+
+    def delete_ticket(self, event_id: str, ticket_id: str):
+        with httpx.Client() as client:
+            url = f"{self.base_url}/api/events/{event_id}/unregister/"
+            response = client.request(
+                method="DELETE",
+                url=url,
+                headers=self.headers,
+                json={"ticket_id": ticket_id},
+            )
+            response.raise_for_status()
+            return response.json()
