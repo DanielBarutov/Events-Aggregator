@@ -51,10 +51,14 @@ class GetEventSeatsUsecase:
         self.client = EventsProviderClient()
 
     async def execute(self, event_id):
+        memory = cache.get(event_id)
+        if memory:
+            return memory
         event = await GetEventByIdUsecase(self.repository).execute(event_id)
         if event and event.status == "published":
             available_seats = await self.client.get_available_seats(event_id)
             result = {"event_id": event_id, "available_seats": available_seats}
+            cache.set(event_id, result, 60)
         else:
             result = {"пока такая 404"}
         return result

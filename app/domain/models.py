@@ -26,3 +26,11 @@ class EventEntity:
     changed_at: datetime
     created_at: datetime
     status_changed_at: datetime
+
+
+@dataclass
+class SyncStatusEntity:
+    id: str
+    last_sync_time: datetime
+    last_changed_at: datetime
+    sync_status: str

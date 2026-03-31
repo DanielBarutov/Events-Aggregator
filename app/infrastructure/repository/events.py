@@ -107,12 +107,9 @@ class EventsRepository:
         )
         return result.scalar()
 
-    async def sync(self, places: list[PlaceEntity], events: list[EventEntity]) -> None:
-        print(places)
-        m_places = [self.to_place_model(place) for place in places]
-        m_events = [self.to_event_model(event) for event in events]
-        for p in m_places:
-            await self.session.merge(p)
-        for e in m_events:
-            await self.session.merge(e)
+    async def sync(self, place: PlaceEntity, event: EventEntity) -> None:
+        m_place = self.to_place_model(place)
+        m_event = self.to_event_model(event)
+        await self.session.merge(m_place)
+        await self.session.merge(m_event)
         await self.session.commit()

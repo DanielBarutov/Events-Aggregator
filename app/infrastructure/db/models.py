@@ -20,14 +20,11 @@ class Place(Base):
     seats_pattern = Column(String, nullable=True)
     changed_at = Column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone_msk),
-        onupdate=lambda: datetime.now(timezone_msk),
         nullable=True,
     )
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
     )
     events = relationship("Event", back_populates="place")
 
@@ -41,45 +38,38 @@ class Event(Base):
     event_time = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
     )
     registration_deadline = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
     )
     status = Column(String, nullable=True)
     number_of_visitors = Column(Integer, nullable=True)
     changed_at = Column(
         DateTime(timezone=True),
-        onupdate=lambda: datetime.now(timezone_msk),
         nullable=True,
-        default=lambda: datetime.now(timezone_msk),
     )
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
     )
     status_changed_at = Column(
         DateTime(timezone=True),
-        onupdate=lambda: datetime.now(timezone_msk),
         nullable=True,
-        default=lambda: datetime.now(timezone_msk),
     )
 
 
 class SyncStatus(Base):
     __tablename__ = "sync_status"
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
     last_sync_time = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
+        default=datetime.now(timezone_msk),
     )
     last_changed_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone_msk),
+        default=datetime.now(timezone_msk),
     )
     sync_status = Column(String, nullable=False)
