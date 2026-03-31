@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from usecases.create_ticket import TicketUsecase
 from api.deps import get_tickets_usecase
+from shemas.tickets import TicketCreateResponse, TicketDeleteResponse
 
 router = APIRouter(tags=["tickets"])
 
 
-@router.post("/tickets")
+@router.post(
+    "/tickets", status_code=status.HTTP_201_CREATED, response_model=TicketCreateResponse
+)
 async def create_tickets(
     event_id: str,
     first_name: str,

@@ -81,5 +81,9 @@ class TicketsRepository:
         )
 
     async def delete_ticket(self, ticket_id: str) -> None:
-        await self.session.delete(Ticket(id=ticket_id))
+        data = await self.session.execute(select(Ticket).where(Ticket.id == ticket_id))
+        ticket = data.scalar()
+        if not ticket:
+            raise Exception("Ticket not found")
+        await self.session.delete(ticket)
         await self.session.commit()

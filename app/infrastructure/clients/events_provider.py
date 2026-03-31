@@ -1,3 +1,4 @@
+import json
 import httpx
 import os
 from shemas.event import EventListPydantic
@@ -37,10 +38,11 @@ class EventsProviderClient:
     def create_ticket(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ):
-        with httpx.Client(base_url=self.base_url) as client:
+        with httpx.Client() as client:
             url = f"{self.base_url}/api/events/{event_id}/register/"
-            response = client.post(
-                url,
+            response = client.request(
+                method="POST",
+                url=url,
                 headers=self.headers,
                 json={
                     "first_name": first_name,
@@ -49,6 +51,8 @@ class EventsProviderClient:
                     "email": email,
                 },
             )
+            print(response.url)
+            print(response.json())
             response.raise_for_status()
             return response.json()
 
@@ -61,5 +65,7 @@ class EventsProviderClient:
                 headers=self.headers,
                 json={"ticket_id": ticket_id},
             )
+            print(response.url)
             response.raise_for_status()
+            print(response.json())
             return response.json()

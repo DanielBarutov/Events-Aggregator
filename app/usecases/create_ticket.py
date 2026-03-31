@@ -57,5 +57,6 @@ class TicketUsecase:
             raise Exception("Event is not published")
         if event.event_time < datetime.now(event.event_time.tzinfo):
             raise Exception("Event has already started")
-        self.client.delete_ticket(event_id, ticket_id)
         await self.tickets_repository.delete_ticket(ticket_id)
+        self.client.delete_ticket(event_id, ticket_id)
+        return {"success": True}
