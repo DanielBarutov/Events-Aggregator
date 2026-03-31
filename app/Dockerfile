@@ -18,4 +18,4 @@ USER appuser
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["sh", "-c", "cd /app/app && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "cd /app/app && uv run alembic upgrade head && uv run uvicorn main:app --host 0.0.0.0 --port 8000"]
