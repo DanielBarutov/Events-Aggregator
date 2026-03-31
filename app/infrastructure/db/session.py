@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
 from dotenv import load_dotenv
-from domain.exceptions import DatabaseError
+from domain.exceptions import DatabaseError, AppError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,11 @@ async def get_session():
                 raise e
             finally:
                 await session.close()
+    except AppError:
+        raise
     except Exception as e:
+        logger.exception("Неизвестная ошибка при получении сессии")
         raise DatabaseError(
-            "Неизвестная ошибка при получении сессии", details={"reason": str(e)}
+            "Неизвестная ошибка при получении сессии",
+            details={"reason": str(e)},
         )

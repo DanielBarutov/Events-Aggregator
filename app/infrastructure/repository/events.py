@@ -122,8 +122,9 @@ class EventsRepository:
         try:
             if event_id is None:
                 raise NotFoundError(
-                    "Событие не найдено", details={"event_id": event_id}
+                    "ID события не указан", details={"event_id": event_id}
                 )
+
             result = await self.session.execute(
                 select(Event)
                 .where(Event.id == event_id)
@@ -131,18 +132,16 @@ class EventsRepository:
                 .options(selectinload(Event.place))
             )
             event = result.scalar()
+            if event is None:
+                raise NotFoundError(
+                    "Событие не найдено", details={"event_id": event_id}
+                )
             return self.to_event_entity(event)
         except AppError:
             raise
         except Exception as e:
-            logger.exception(
-                "Неизвестная ошибка при получении события",
-                extra={"event_id": event_id},
-                details={"reason": str(e)},
-            )
-            raise DatabaseError(
-                "Неизвестная ошибка при получении события", details={"reason": str(e)}
-            )
+            logger.exception("Неизвестная ошибка при получении события")
+            raise NotFoundError("Событи11е не найдено", details={"event_id": event_id})
 
     async def get_events_with_places(
         self, date: date | None = None
