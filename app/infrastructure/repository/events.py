@@ -31,8 +31,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при преобразовании места",
-                extra={"place": place},
-                details={"reason": str(e)},
+                extra={"place": place, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при преобразовании места",
@@ -59,8 +58,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при преобразовании события",
-                extra={"event": event},
-                details={"reason": str(e)},
+                extra={"event": event, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при преобразовании события",
@@ -83,8 +81,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при преобразовании места",
-                extra={"place": place},
-                details={"reason": str(e)},
+                extra={"place": place, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при преобразовании места",
@@ -110,8 +107,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при преобразовании события",
-                extra={"event": event},
-                details={"reason": str(e)},
+                extra={"event": event, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при преобразовании события",
@@ -162,8 +158,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении событий",
-                extra={"date": date},
-                details={"reason": str(e)},
+                extra={"date": date, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при получении событий", details={"reason": str(e)}
@@ -188,8 +183,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении места",
-                extra={"event_id": event_id},
-                details={"reason": str(e)},
+                extra={"event_id": event_id, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при получении места", details={"reason": str(e)}
@@ -207,8 +201,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при удалении событий",
-                extra={"events": events},
-                details={"reason": str(e)},
+                extra={"events": events, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при удалении событий", details={"reason": str(e)}
@@ -250,8 +243,7 @@ class EventsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при синхронизации",
-                extra={"place": place, "event": event},
-                details={"reason": str(e)},
+                extra={"place": place, "event": event, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при синхронизации", details={"reason": str(e)}

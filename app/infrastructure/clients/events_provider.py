@@ -35,8 +35,7 @@ class EventsProviderClient:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении событий",
-                extra={"url": url, "date": date},
-                details={"reason": str(e)},
+                extra={"url": url, "date": date, "reason": str(e)},
             )
             raise ExternalProviderError(
                 "Неизвестная ошибка при получении событий", details={"reason": str(e)}
@@ -55,8 +54,7 @@ class EventsProviderClient:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении доступных мест",
-                extra={"event_id": event_id},
-                details={"reason": str(e)},
+                extra={"event_id": event_id, "reason": str(e)},
             )
             raise ExternalProviderError(
                 "Неизвестная ошибка при получении доступных мест",
@@ -93,8 +91,8 @@ class EventsProviderClient:
                     "last_name": last_name,
                     "email": email,
                     "seat": seat,
+                    "reason": str(e),
                 },
-                details={"reason": str(e)},
             )
             raise ExternalProviderError(
                 "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
@@ -117,8 +115,7 @@ class EventsProviderClient:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при удалении тикета",
-                extra={"event_id": event_id, "ticket_id": ticket_id},
-                details={"reason": str(e)},
+                extra={"event_id": event_id, "ticket_id": ticket_id, "reason": str(e)},
             )
             raise ExternalProviderError(
                 "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}

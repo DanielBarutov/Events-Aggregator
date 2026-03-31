@@ -52,8 +52,7 @@ class TicketsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при создании пользователя",
-                extra={"email": email},
-                details={"reason": str(e)},
+                extra={"email": email, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при создании пользователя",
@@ -101,8 +100,7 @@ class TicketsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при создании тикета",
-                extra={"ticket_id": ticket_id},
-                details={"reason": str(e)},
+                extra={"ticket_id": ticket_id, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
@@ -132,8 +130,7 @@ class TicketsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении тикета",
-                extra={"ticket_id": ticket_id},
-                details={"reason": str(e)},
+                extra={"ticket_id": ticket_id, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при получении тикета", details={"reason": str(e)}
@@ -159,8 +156,7 @@ class TicketsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении пользователя",
-                extra={"email": email},
-                details={"reason": str(e)},
+                extra={"email": email, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при получении пользователя",
@@ -186,8 +182,7 @@ class TicketsRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при удалении тикета",
-                extra={"ticket_id": ticket_id},
-                details={"reason": str(e)},
+                extra={"ticket_id": ticket_id, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}

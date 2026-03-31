@@ -30,8 +30,7 @@ class MemoryCache:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении из кэша",
-                extra={"key": key},
-                details={"reason": str(e)},
+                extra={"key": key, "reason": str(e)},
             )
             raise CacheError(
                 "Неизвестная ошибка при получении из кэша", details={"reason": str(e)}
@@ -46,8 +45,7 @@ class MemoryCache:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при сохранении в кэш",
-                extra={"key": key},
-                details={"reason": str(e)},
+                extra={"key": key, "reason": str(e)},
             )
             raise CacheError(
                 "Неизвестная ошибка при сохранении в кэш", details={"reason": str(e)}

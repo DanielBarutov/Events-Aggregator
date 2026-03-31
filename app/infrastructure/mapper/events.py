@@ -41,8 +41,7 @@ class EventsMapper:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при преобразовании события",
-                extra={"event": event},
-                details={"reason": str(e)},
+                extra={"event": event, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при преобразовании события",
@@ -66,8 +65,7 @@ class EventsMapper:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошика при преобразовании места",
-                extra={"place": place},
-                details={"reason": str(e)},
+                extra={"place": place, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошика при преобразовании места",

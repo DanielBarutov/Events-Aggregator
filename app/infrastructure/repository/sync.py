@@ -36,8 +36,7 @@ class SyncMetadataRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при создании синхронизации",
-                extra={"uuid": uuid},
-                details={"reason": str(e)},
+                extra={"uuid": uuid, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при создании синхронизации",
@@ -78,8 +77,7 @@ class SyncMetadataRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при получении синхронизации",
-                extra={"uuid": uuid},
-                details={"reason": str(e)},
+                extra={"uuid": uuid, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при получении синхронизации",
@@ -115,8 +113,7 @@ class SyncMetadataRepository:
         except Exception as e:
             logger.exception(
                 "Неизвестная ошибка при обновлении синхронизации",
-                extra={"uuid": uuid},
-                details={"reason": str(e)},
+                extra={"uuid": uuid, "reason": str(e)},
             )
             raise DatabaseError(
                 "Неизвестная ошибка при обновлении синхронизации",
