@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 
 
-class TicketCreateResponse(BaseModel):
-    ticket_id: str
+class TicketCreateRequest(BaseModel):
+    event_id: str
+    first_name: str
+    last_name: str
+    email: str
+    seat: str
 
 
 class TicketDeleteResponse(BaseModel):

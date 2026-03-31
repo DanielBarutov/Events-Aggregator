@@ -1,29 +1,29 @@
 from fastapi import APIRouter, Depends, status
 from usecases.create_ticket import TicketUsecase
 from api.deps import get_tickets_usecase
-from shemas.tickets import TicketCreateResponse
+from shemas.tickets import TicketCreateRequest
 
 router = APIRouter(tags=["tickets"])
 
 
 @router.post(
-    "/tickets/",
+    "/tickets",
     status_code=status.HTTP_201_CREATED,
-    response_model=TicketCreateResponse,
 )
 async def create_tickets(
-    event_id: str,
-    first_name: str,
-    last_name: str,
-    email: str,
-    seat: str,
+    request_data: TicketCreateRequest,
     usecase: TicketUsecase = Depends(get_tickets_usecase),
 ):
-    print("При создании тикета указано:", event_id, first_name, last_name, email, seat)
-    return await usecase.create(event_id, first_name, last_name, email, seat)
+    return await usecase.create(
+        event_id=request_data.event_id,
+        first_name=request_data.first_name,
+        last_name=request_data.last_name,
+        email=request_data.email,
+        seat=request_data.seat,
+    )
 
 
-@router.delete("/tickets/{ticket_id}/")
+@router.delete("/tickets/{ticket_id}")
 async def delete_ticket(
     ticket_id: str,
     usecase: TicketUsecase = Depends(get_tickets_usecase),
