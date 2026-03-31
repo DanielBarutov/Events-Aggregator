@@ -139,14 +139,14 @@ class TicketsRepository:
                 "Неизвестная ошибка при получении тикета", details={"reason": str(e)}
             )
 
-    async def get_user(self, email: str) -> UserEntity:
+    async def get_user(self, email: str) -> UserEntity | None:
         try:
             if email is None:
                 raise NotFoundError("Email не указан", details={"email": email})
             data = await self.session.execute(select(User).where(User.email == email))
             user = data.scalar()
-            if not user:
-                raise NotFoundError("Пользователь не найден", details={"email": email})
+            if user is None:
+                return None
             return UserEntity(
                 id=user.id,
                 email=user.email,
