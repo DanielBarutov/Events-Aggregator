@@ -1,7 +1,7 @@
 import time
 from typing import Any
 
-from app.domain.exceptions import AppError, CacheError
+from domain.exceptions import AppError, CacheError
 import logging
 
 logger = logging.getLogger(__name__)

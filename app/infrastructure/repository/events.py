@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.domain.exceptions import DatabaseError, AppError
+from domain.exceptions import DatabaseError, AppError
 from infrastructure.db.models import Event, Place
 from domain.models import EventEntity
 from domain.models import PlaceEntity

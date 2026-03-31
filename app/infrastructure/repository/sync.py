@@ -2,7 +2,7 @@ from datetime import datetime
 import uuid as uuid_lib
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.domain.exceptions import AppError, DatabaseError
+from domain.exceptions import AppError, DatabaseError
 from infrastructure.db.models import SyncStatus
 from domain.models import SyncStatusEntity
 

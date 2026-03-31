@@ -1,1 +1,0 @@
-# настройки (env, pydantic settings)

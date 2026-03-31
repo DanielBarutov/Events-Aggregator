@@ -1,6 +1,6 @@
 import httpx
 import os
-from app.domain.exceptions import ExternalProviderError, AppError
+from domain.exceptions import ExternalProviderError, AppError
 from shemas.event import EventListPydantic
 import logging
 
