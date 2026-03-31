@@ -18,6 +18,16 @@ class TicketsRepository:
         self, email: str, first_name: str, last_name: str
     ) -> UserEntity:
         try:
+            if email is None:
+                raise NotFoundError("Email не указан", details={"email": email})
+            if first_name is None:
+                raise NotFoundError(
+                    "Имя не указано", details={"first_name": first_name}
+                )
+            if last_name is None:
+                raise NotFoundError(
+                    "Фамилия не указана", details={"last_name": last_name}
+                )
             id = str(uuid.uuid4())
             created_at = datetime.now()
             self.session.add(
@@ -54,6 +64,20 @@ class TicketsRepository:
         self, ticket_id: str, user_id: str, event_id: str, seat: str
     ) -> TicketEntity:
         try:
+            if ticket_id is None:
+                raise NotFoundError(
+                    "ID тикета не указан", details={"ticket_id": ticket_id}
+                )
+            if user_id is None:
+                raise NotFoundError(
+                    "ID пользователя не указан", details={"user_id": user_id}
+                )
+            if event_id is None:
+                raise NotFoundError(
+                    "ID события не указан", details={"event_id": event_id}
+                )
+            if seat is None:
+                raise NotFoundError("Место не указано", details={"seat": seat})
             created_at = datetime.now()
             self.session.add(
                 Ticket(
@@ -86,6 +110,10 @@ class TicketsRepository:
 
     async def get_ticket(self, ticket_id: str) -> TicketEntity:
         try:
+            if ticket_id is None:
+                raise NotFoundError(
+                    "ID тикета не указан", details={"ticket_id": ticket_id}
+                )
             data = await self.session.execute(
                 select(Ticket).where(Ticket.id == ticket_id)
             )
@@ -113,6 +141,8 @@ class TicketsRepository:
 
     async def get_user(self, email: str) -> UserEntity:
         try:
+            if email is None:
+                raise NotFoundError("Email не указан", details={"email": email})
             data = await self.session.execute(select(User).where(User.email == email))
             user = data.scalar()
             if not user:
@@ -139,6 +169,10 @@ class TicketsRepository:
 
     async def delete_ticket(self, ticket_id: str) -> None:
         try:
+            if ticket_id is None:
+                raise NotFoundError(
+                    "ID тикета не указан", details={"ticket_id": ticket_id}
+                )
             data = await self.session.execute(
                 select(Ticket).where(Ticket.id == ticket_id)
             )

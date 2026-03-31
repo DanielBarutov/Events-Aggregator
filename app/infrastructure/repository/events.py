@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from domain.exceptions import DatabaseError, AppError
+from domain.exceptions import DatabaseError, AppError, NotFoundError
 from infrastructure.db.models import Event, Place
 from domain.models import EventEntity
 from domain.models import PlaceEntity
@@ -120,6 +120,10 @@ class EventsRepository:
 
     async def get_event(self, event_id) -> EventEntity:
         try:
+            if event_id is None:
+                raise NotFoundError(
+                    "Событие не найдено", details={"event_id": event_id}
+                )
             result = await self.session.execute(
                 select(Event)
                 .where(Event.id == event_id)
@@ -168,6 +172,10 @@ class EventsRepository:
 
     async def get_place(self, event_id) -> EventEntity:
         try:
+            if event_id is None:
+                raise NotFoundError(
+                    "Событие не найдено", details={"event_id": event_id}
+                )
             result = await self.session.execute(
                 select(Event)
                 .where(Event.id == event_id, Event.status == "published")
@@ -190,6 +198,8 @@ class EventsRepository:
 
     async def delete_events(self, events: list[EventEntity]):
         try:
+            if events is None:
+                raise NotFoundError("События не найдены", details={"events": events})
             for event in events:
                 await self.session.delete(event)
                 await self.session.commit()
@@ -226,6 +236,11 @@ class EventsRepository:
     async def sync(self, place: PlaceEntity, event: EventEntity) -> None:
 
         try:
+            if place is None or event is None:
+                raise NotFoundError(
+                    "Место или событие не найдены",
+                    details={"place": place, "event": event},
+                )
             m_place = self.to_place_model(place)
             m_event = self.to_event_model(event)
             await self.session.merge(m_place)

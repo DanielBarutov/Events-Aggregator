@@ -2,7 +2,7 @@ from datetime import datetime
 import uuid as uuid_lib
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from domain.exceptions import AppError, DatabaseError
+from domain.exceptions import AppError, DatabaseError, NotFoundError
 from infrastructure.db.models import SyncStatus
 from domain.models import SyncStatusEntity
 
@@ -17,6 +17,13 @@ class SyncMetadataRepository:
 
     async def create(self, uuid: str, sync_status: str) -> None:
         try:
+            if uuid is None:
+                raise NotFoundError("UUID не указан", details={"uuid": uuid})
+            if sync_status is None:
+                raise NotFoundError(
+                    "Статус синхронизации не указан",
+                    details={"sync_status": sync_status},
+                )
             self.session.add(
                 SyncStatus(
                     id=uuid,
@@ -83,6 +90,17 @@ class SyncMetadataRepository:
         self, uuid: str, sync_status: str, changed_at: datetime = datetime.now()
     ) -> None:
         try:
+            if uuid is None:
+                raise NotFoundError("UUID не указан", details={"uuid": uuid})
+            if sync_status is None:
+                raise NotFoundError(
+                    "Статус синхронизации не указан",
+                    details={"sync_status": sync_status},
+                )
+            if changed_at is None:
+                raise NotFoundError(
+                    "Время изменения не указано", details={"changed_at": changed_at}
+                )
             result = await self.session.execute(
                 select(SyncStatus).where(SyncStatus.id == uuid)
             )
