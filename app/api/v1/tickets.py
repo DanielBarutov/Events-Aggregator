@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from usecases.create_ticket import TicketUsecase
 from api.deps import get_tickets_usecase
-from shemas.tickets import TicketCreateResponse, TicketDeleteResponse
+from shemas.tickets import TicketCreateResponse
 
 router = APIRouter(tags=["tickets"])
 

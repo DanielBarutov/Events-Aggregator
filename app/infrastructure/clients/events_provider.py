@@ -1,4 +1,3 @@
-import json
 import httpx
 import os
 from shemas.event import EventListPydantic
