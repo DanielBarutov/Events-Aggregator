@@ -139,7 +139,7 @@ class EventsRepository:
             return self.to_event_entity(event)
         except AppError:
             raise
-        except Exception as e:
+        except Exception:
             logger.exception("Неизвестная ошибка при получении события")
             raise NotFoundError("Событи11е не найдено", details={"event_id": event_id})
 
