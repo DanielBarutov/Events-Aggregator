@@ -1,13 +1,23 @@
 from contextlib import asynccontextmanager
 
 import asyncio
+import logging
+
 
 from dotenv import load_dotenv
 from api.router import router
 from fastapi import FastAPI
+from api.exception_handlers import register_exception_handlers
 from service.sync_worker import run_sync_loop
 
 load_dotenv()
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 class _SyncLoopUsecaseStub:
@@ -29,4 +39,5 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+register_exception_handlers(app)
 app.include_router(router)

@@ -3,6 +3,10 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
 from dotenv import load_dotenv
+from domain.exceptions import DatabaseError
+import logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -20,11 +24,16 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_session():
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        except Exception as e:
-            await session.rollback()
-            raise e
-        finally:
-            await session.close()
+    try:
+        async with AsyncSessionLocal() as session:
+            try:
+                yield session
+            except Exception as e:
+                await session.rollback()
+                raise e
+            finally:
+                await session.close()
+    except Exception as e:
+        raise DatabaseError(
+            "Неизвестная ошибка при получении сессии", details={"reason": str(e)}
+        )

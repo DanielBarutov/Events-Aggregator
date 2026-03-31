@@ -1,9 +1,14 @@
 from datetime import datetime, timezone
+
 import uuid as uuid_lib
+from domain.exceptions import AppError, BusinessLogicError
 from utils.pagination import EventsPaginator
 from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.mapper.events import EventsMapper
 from domain.models import SyncStatusEntity
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SyncEventsUsecase:
@@ -17,40 +22,51 @@ class SyncEventsUsecase:
         self.max_changed_at = datetime(2000, 1, 1, 0, 0, 0)
 
     async def execute(self):
-        # try:
-        last_sync: SyncStatusEntity = await self.get_sync()
-        self.max_changed_at = last_sync.last_changed_at
-        await self.start_sync()
-        paginator = EventsPaginator(
-            self.client, last_sync.last_changed_at.strftime("%Y-%m-%d")
-        )
-        async for events in paginator:
-            for event in events:
-                event_changed_at = datetime.fromisoformat(
-                    event.get("changed_at")
-                ).astimezone(timezone.utc)
-                if event_changed_at > self.max_changed_at:
-                    await self.events_repository.sync(
-                        EventsMapper(event).map_places(),
-                        EventsMapper(event).map_events(),
-                    )
-                    self.max_changed_at = event_changed_at
+        try:
+            last_sync: SyncStatusEntity = await self.get_sync()
+            self.max_changed_at = last_sync.last_changed_at
+            await self.start_sync()
+            paginator = EventsPaginator(
+                self.client, last_sync.last_changed_at.strftime("%Y-%m-%d")
+            )
+            async for events in paginator:
+                for event in events:
+                    event_changed_at = datetime.fromisoformat(
+                        event.get("changed_at")
+                    ).astimezone(timezone.utc)
+                    if event_changed_at > self.max_changed_at:
+                        await self.events_repository.sync(
+                            EventsMapper(event).map_places(),
+                            EventsMapper(event).map_events(),
+                        )
+                        self.max_changed_at = event_changed_at
 
-        # except Exception as e:
-        # await self.fail()
-        # raise e
-        # finally:
-        await self.end()
+        except AppError:
+            await self.fail()
+            logger.exception(
+                "Фатальная ошибка при синхронизации", extra={"sync_id": self.uuid}
+            )
+            raise
+        except Exception as e:
+            await self.fail()
+            logger.exception(
+                "Неизвестая ошибка при синхронизации", extra={"sync_id": self.uuid}
+            )
+            raise BusinessLogicError(
+                "Неизвестая ошибка при синхронизации", details={"reason": str(e)}
+            )
+        else:
+            await self.end()
 
     async def start_sync(self):
-        print("Начата сихронизация")
+        logger.info("Начата сихронизация")
         return await self.sync_repository.create(self.uuid, "run")
 
     async def get_sync(self):
         return await self.sync_repository.get()
 
     async def end(self):
-        print("Закончена сихронизация")
+        logger.info("Завершена синхранизация")
         return await self.sync_repository.update(
             self.uuid, "completed", self.max_changed_at
         )

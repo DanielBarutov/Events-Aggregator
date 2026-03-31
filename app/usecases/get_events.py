@@ -1,9 +1,12 @@
 from datetime import date
 
+from domain.exceptions import AppError, BusinessLogicError, NotFoundError
 from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.cache.memory import MemoryCache
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 cache = MemoryCache()
 
 
@@ -12,28 +15,49 @@ class GetEventsUsecase:
         self.repository = repository
 
     async def execute(self, data_from: date, page: int, page_size: int):
-        result = await self.repository.get_events_with_places(data_from)
-        sorted_result = sorted(result, key=lambda x: x.event_time, reverse=True)
-        return self.get_paginated_result(sorted_result, page, page_size)
+        try:
+            result = await self.repository.get_events_with_places(data_from)
+            sorted_result = sorted(result, key=lambda x: x.event_time, reverse=True)
+            return self.get_paginated_result(sorted_result, page, page_size)
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при получении событий",
+                extra={"data_from": data_from},
+            )
+            raise BusinessLogicError(
+                "Неизвестная ошибка при получении событий", details={"reason": str(e)}
+            )
 
     def get_paginated_result(self, result: list, page: int, page_size: int):
-        start = (page - 1) * page_size
-        end = start + page_size
-        count = len(result)
-        next_page = page + 1
-        prev_page = page - 1
-        hostname = os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE")
-        data_result = {
-            "count": count,
-            "next": f"{hostname}/api/events/?page={next_page}"
-            if next_page - 2 < (count // page_size)
-            else None,
-            "previous": f"{hostname}/api/events/?page={prev_page}"
-            if prev_page >= 1
-            else None,
-            "results": result[start:end],
-        }
-        return data_result
+        try:
+            start = (page - 1) * page_size
+            end = start + page_size
+            count = len(result)
+            next_page = page + 1
+            prev_page = page - 1
+            hostname = os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE")
+            data_result = {
+                "count": count,
+                "next": f"{hostname}/api/events/?page={next_page}"
+                if next_page - 2 < (count // page_size)
+                else None,
+                "previous": f"{hostname}/api/events/?page={prev_page}"
+                if prev_page >= 1
+                else None,
+                "results": result[start:end],
+            }
+            return data_result
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при получении событий",
+            )
+            raise BusinessLogicError(
+                "Неизвестная ошибка при получении событий", details={"reason": str(e)}
+            )
 
 
 class GetEventByIdUsecase:
@@ -51,14 +75,27 @@ class GetEventSeatsUsecase:
         self.client = EventsProviderClient()
 
     async def execute(self, event_id):
-        memory = cache.get(event_id)
-        if memory:
-            return memory
-        event = await GetEventByIdUsecase(self.repository).execute(event_id)
-        if event and event.status == "published":
-            available_seats = await self.client.get_available_seats(event_id)
-            result = {"event_id": event_id, "available_seats": available_seats}
-            cache.set(event_id, result, 60)
-        else:
-            result = {"пока такая 404"}
-        return result
+        try:
+            memory = cache.get(event_id)
+            if memory:
+                return memory
+            event = await GetEventByIdUsecase(self.repository).execute(event_id)
+            if event and event.status == "published":
+                available_seats = await self.client.get_available_seats(event_id)
+                result = {"event_id": event_id, "available_seats": available_seats}
+                cache.set(event_id, result, 60)
+            else:
+                raise NotFoundError(
+                    "Событие не найдено", details={"event_id": event_id}
+                )
+            return result
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при получении мест",
+                extra={"event_id": event_id},
+            )
+            raise BusinessLogicError(
+                "Неизвестная ошибка при получении мест", details={"reason": str(e)}
+            )

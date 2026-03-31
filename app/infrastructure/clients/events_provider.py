@@ -1,6 +1,10 @@
 import httpx
 import os
+from app.domain.exceptions import ExternalProviderError, AppError
 from shemas.event import EventListPydantic
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EventsProviderClient:
@@ -10,61 +14,112 @@ class EventsProviderClient:
         self.date = "data_from=2000-01-01"
 
     async def get_events(self, url: str, date: str | None = None) -> EventListPydantic:
-        if date:
-            self.date = f"data_from={date}"
-        async with httpx.AsyncClient(base_url=self.base_url, timeout=60) as client:
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            data = response.json()
-            # Для локального тестирования:
-            local_test = 0
-            if local_test == 1:
-                if data["next"]:
-                    data["next"] = data["next"].replace("http", "https")
-                if data["previous"]:
-                    data["previous"] = data["previous"].replace("http", "https")
-            # Конец
-            return data
+        try:
+            if date:
+                self.date = f"data_from={date}"
+            async with httpx.AsyncClient(base_url=self.base_url, timeout=60) as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                # Для локального тестирования:
+                local_test = 0
+                if local_test == 1:
+                    if data["next"]:
+                        data["next"] = data["next"].replace("http", "https")
+                    if data["previous"]:
+                        data["previous"] = data["previous"].replace("http", "https")
+                # Конец
+                return data
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при получении событий",
+                extra={"url": url, "date": date},
+                details={"reason": str(e)},
+            )
+            raise ExternalProviderError(
+                "Неизвестная ошибка при получении событий", details={"reason": str(e)}
+            )
 
     async def get_available_seats(self, event_id: str):
-        async with httpx.AsyncClient(base_url=self.base_url) as client:
-            url = f"{self.base_url}/api/events/{event_id}/seats/"
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            data = response.json()
-            return data["seats"]
+        try:
+            async with httpx.AsyncClient(base_url=self.base_url) as client:
+                url = f"{self.base_url}/api/events/{event_id}/seats/"
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                return data["seats"]
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при получении доступных мест",
+                extra={"event_id": event_id},
+                details={"reason": str(e)},
+            )
+            raise ExternalProviderError(
+                "Неизвестная ошибка при получении доступных мест",
+                details={"reason": str(e)},
+            )
 
     def create_ticket(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ):
-        with httpx.Client() as client:
-            url = f"{self.base_url}/api/events/{event_id}/register/"
-            response = client.request(
-                method="POST",
-                url=url,
-                headers=self.headers,
-                json={
+        try:
+            with httpx.Client() as client:
+                url = f"{self.base_url}/api/events/{event_id}/register/"
+                response = client.request(
+                    method="POST",
+                    url=url,
+                    headers=self.headers,
+                    json={
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "seat": seat,
+                        "email": email,
+                    },
+                )
+                response.raise_for_status()
+                return response.json()
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при создании тикета",
+                extra={
+                    "event_id": event_id,
                     "first_name": first_name,
                     "last_name": last_name,
-                    "seat": seat,
                     "email": email,
+                    "seat": seat,
                 },
+                details={"reason": str(e)},
             )
-            print(response.url)
-            print(response.json())
-            response.raise_for_status()
-            return response.json()
+            raise ExternalProviderError(
+                "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
+            )
 
     def delete_ticket(self, event_id: str, ticket_id: str):
-        with httpx.Client() as client:
-            url = f"{self.base_url}/api/events/{event_id}/unregister/"
-            response = client.request(
-                method="DELETE",
-                url=url,
-                headers=self.headers,
-                json={"ticket_id": ticket_id},
+        try:
+            with httpx.Client() as client:
+                url = f"{self.base_url}/api/events/{event_id}/unregister/"
+                response = client.request(
+                    method="DELETE",
+                    url=url,
+                    headers=self.headers,
+                    json={"ticket_id": ticket_id},
+                )
+                response.raise_for_status()
+                return response.json()
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при удалении тикета",
+                extra={"event_id": event_id, "ticket_id": ticket_id},
+                details={"reason": str(e)},
             )
-            print(response.url)
-            response.raise_for_status()
-            print(response.json())
-            return response.json()
+            raise ExternalProviderError(
+                "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}
+            )
