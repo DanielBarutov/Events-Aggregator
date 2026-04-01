@@ -3,7 +3,7 @@ import logging
 
 import httpx
 
-from domain.exceptions import ExternalProviderError, AppError
+from domain.exceptions import ExternalProviderError, AppError, InputError
 from shemas.event import EventListPydantic
 
 
@@ -41,6 +41,11 @@ class EventsProviderClient:
             async with httpx.AsyncClient(base_url=self.base_url) as client:
                 url = f"{self.base_url}/api/events/{event_id}/seats/"
                 response = await client.get(url, headers=self.headers)
+                if response.status_code == 500:
+                    raise InputError(
+                        "Ошибка при запросе доступных мест",
+                        details={"reason": response.status_code},
+                    )
                 response.raise_for_status()
                 data = response.json()
                 return data["seats"]
