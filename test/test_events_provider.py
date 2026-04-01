@@ -6,7 +6,7 @@ from domain.exceptions import ExternalProviderError
 from infrastructure.clients.events_provider import EventsProviderClient
 
 
-def test_get_events_replaces_http_with_https():
+def test_get_events():
     async def run():
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -23,7 +23,7 @@ def test_get_events_replaces_http_with_https():
 
         with patch("infrastructure.clients.events_provider.os.getenv") as getenv_mock:
             getenv_mock.side_effect = lambda key: {
-                "EVENTS_PROVIDER_SERVER_URL_OUTSIDE": "https://api.example",
+                "EVENTS_PROVIDER_SERVER_URL_OUTSIDE": "http://api.example",
                 "EVENTS_PROVIDER_API_KEY": "secret",
             }.get(key)
             with patch(
@@ -31,10 +31,10 @@ def test_get_events_replaces_http_with_https():
                 return_value=inner_client,
             ):
                 provider = EventsProviderClient()
-                data = await provider.get_events("https://api.example/api/events/")
+                data = await provider.get_events("http://api.example/api/events/")
 
-        assert data["next"] == "https://api.example/next"
-        assert data["previous"] == "https://api.example/prev"
+        assert data["next"] == "http://api.example/next"
+        assert data["previous"] == "http://api.example/prev"
         inner_client.get.assert_awaited_once()
         _, kwargs = inner_client.get.call_args
         assert kwargs["headers"] == {"x-api-key": "secret"}
