@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from zoneinfo import ZoneInfo
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -41,3 +42,7 @@ class EventPaginationPydantic(BaseModel):
     next: str | None = None
     previous: str | None = None
     results: list[EventPydantic]
+
+
+class EventAvaibleSeats:
+    event_id: uuid

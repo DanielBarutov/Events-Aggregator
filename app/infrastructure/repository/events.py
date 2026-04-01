@@ -1,11 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from domain.exceptions import DatabaseError, AppError, NotFoundError
+from domain.exceptions import DatabaseError, AppError, InputError, NotFoundError
 from infrastructure.db.models import Event, Place
 from domain.models import EventEntity
 from domain.models import PlaceEntity
 from datetime import date
+import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -116,6 +117,13 @@ class EventsRepository:
 
     async def get_event(self, event_id) -> EventEntity:
         try:
+            try:
+                uuid.UUID(str(event_id))
+            except Exception:
+                raise InputError(
+                    "ID события не соотвествует формату", details={"event_id": event_id}
+                )
+
             if event_id is None:
                 raise NotFoundError(
                     "ID события не указан", details={"event_id": event_id}
@@ -137,7 +145,7 @@ class EventsRepository:
             raise
         except Exception:
             logger.exception("Неизвестная ошибка при получении события")
-            raise NotFoundError("Событи11е не найдено", details={"event_id": event_id})
+            raise NotFoundError("Событие не найдено", details={"event_id": event_id})
 
     async def get_events_with_places(
         self, date: date | None = None

@@ -34,3 +34,8 @@ class DatabaseError(AppError):
 class CacheError(AppError):
     def __init__(self, message: str, code: int = 500, details: dict = None):
         super().__init__(message, code, details)
+
+
+class InputError(AppError):
+    def __init__(self, message: str, code: int = 400, details: dict = None):
+        super().__init__(message, code, details)
