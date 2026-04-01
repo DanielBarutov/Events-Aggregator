@@ -1,7 +1,9 @@
-from domain.models import PlaceEntity, EventEntity
-from shemas.sync import SyncEventPydantic, SyncPlacePydantic
-from domain.exceptions import AppError, DatabaseError
 import logging
+
+from domain.models import PlaceEntity, EventEntity
+from domain.exceptions import AppError, DatabaseError
+from shemas.sync import SyncEventPydantic, SyncPlacePydantic
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,14 @@
+import uuid
+import logging
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from infrastructure.db.models import User, Ticket
 from domain.models import TicketEntity, UserEntity
-import uuid
-from datetime import datetime
 from domain.exceptions import DatabaseError, AppError, NotFoundError
-import logging
+
 
 logger = logging.getLogger(__name__)
 

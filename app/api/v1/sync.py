@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from api.deps import manual_trigger_sync
 from usecases.sync_events import SyncEventsUsecase
 

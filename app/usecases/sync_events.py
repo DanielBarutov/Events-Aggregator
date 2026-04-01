@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
-
 import uuid as uuid_lib
+import logging
+
 from domain.exceptions import AppError, BusinessLogicError
+from domain.models import SyncStatusEntity
 from utils.pagination import EventsPaginator
 from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.mapper.events import EventsMapper
-from domain.models import SyncStatusEntity
-import logging
+
 
 logger = logging.getLogger(__name__)
 

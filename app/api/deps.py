@@ -1,17 +1,18 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from infrastructure.repository.tickets import TicketsRepository
 from infrastructure.repository.sync import SyncMetadataRepository
-from usecases.sync_events import SyncEventsUsecase
-from infrastructure.db.session import get_session
 from infrastructure.repository.events import EventsRepository
+from infrastructure.clients.events_provider import EventsProviderClient
+from infrastructure.db.session import get_session
+from usecases.sync_events import SyncEventsUsecase
+from usecases.create_ticket import TicketUsecase
 from usecases.get_events import (
     GetEventsUsecase,
     GetEventByIdUsecase,
     GetEventSeatsUsecase,
 )
-from usecases.create_ticket import TicketUsecase
-from infrastructure.clients.events_provider import EventsProviderClient
 
 
 def get_events_repository(
@@ -47,7 +48,8 @@ def get_event_by_id_usecase(
 def get_event_seats_usecase(
     repository: EventsRepository = Depends(get_events_repository),
 ) -> GetEventSeatsUsecase:
-    return GetEventSeatsUsecase(repository)
+    client = EventsProviderClient()
+    return GetEventSeatsUsecase(repository, client)
 
 
 def manual_trigger_sync(

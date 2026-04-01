@@ -1,10 +1,12 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends
+
 from api.deps import (
     get_events_usecase,
     get_event_by_id_usecase,
     get_event_seats_usecase,
 )
-from datetime import date
 from shemas.event import EventPaginationPydantic, EventPydantic
 from usecases.get_events import (
     GetEventByIdUsecase,

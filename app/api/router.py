@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from api.v1.health import router as health_router
 from api.v1.events import router as events_router
 from api.v1.tickets import router as tickets_router

@@ -1,12 +1,14 @@
 from datetime import datetime
 import uuid as uuid_lib
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from domain.exceptions import AppError, DatabaseError, NotFoundError
-from infrastructure.db.models import SyncStatus
-from domain.models import SyncStatusEntity
 
-import logging
+from domain.exceptions import AppError, DatabaseError, NotFoundError
+from domain.models import SyncStatusEntity
+from infrastructure.db.models import SyncStatus
+
 
 logger = logging.getLogger(__name__)
 

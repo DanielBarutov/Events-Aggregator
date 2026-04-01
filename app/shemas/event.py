@@ -1,6 +1,7 @@
 from datetime import datetime
-import uuid
 from zoneinfo import ZoneInfo
+import uuid
+
 from pydantic import BaseModel, ConfigDict, field_validator
 
 MSK_TZ = ZoneInfo("Europe/Moscow")

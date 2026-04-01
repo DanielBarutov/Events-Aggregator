@@ -1,10 +1,10 @@
 from datetime import date
-
-from domain.exceptions import AppError, BusinessLogicError, NotFoundError
-from infrastructure.clients.events_provider import EventsProviderClient
-from infrastructure.cache.memory import MemoryCache
 import os
 import logging
+
+from domain.exceptions import AppError, BusinessLogicError, NotFoundError
+from infrastructure.cache.memory import MemoryCache
+
 
 logger = logging.getLogger(__name__)
 cache = MemoryCache()
@@ -69,10 +69,10 @@ class GetEventByIdUsecase:
 
 
 class GetEventSeatsUsecase:
-    def __init__(self, repository) -> None:
+    def __init__(self, repository, client) -> None:
         self.repository = repository
         self.cache = cache
-        self.client = EventsProviderClient()
+        self.client = client
 
     async def execute(self, event_id):
         try:

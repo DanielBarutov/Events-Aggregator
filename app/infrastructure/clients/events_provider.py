@@ -1,8 +1,11 @@
-import httpx
 import os
+import logging
+
+import httpx
+
 from domain.exceptions import ExternalProviderError, AppError
 from shemas.event import EventListPydantic
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +24,14 @@ class EventsProviderClient:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
+                # Для локального тестирования:
+                local_test = 1
+                if local_test == 1:
+                    if data["next"]:
+                        data["next"] = data["next"].replace("http", "https")
+                    if data["previous"]:
+                        data["previous"] = data["previous"].replace("http", "https")
+                # Конец
                 return data
         except AppError:
             raise
@@ -53,11 +64,11 @@ class EventsProviderClient:
                 details={"reason": str(e)},
             )
 
-    def create_ticket(
+    async def create_ticket(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ):
         try:
-            with httpx.Client() as client:
+            async with httpx.AsyncClient() as client:
                 url = f"{self.base_url}/api/events/{event_id}/register/"
                 response = client.request(
                     method="POST",
@@ -90,9 +101,9 @@ class EventsProviderClient:
                 "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
             )
 
-    def delete_ticket(self, event_id: str, ticket_id: str):
+    async def delete_ticket(self, event_id: str, ticket_id: str):
         try:
-            with httpx.Client() as client:
+            async with httpx.AsyncClient() as client:
                 url = f"{self.base_url}/api/events/{event_id}/unregister/"
                 response = client.request(
                     method="DELETE",

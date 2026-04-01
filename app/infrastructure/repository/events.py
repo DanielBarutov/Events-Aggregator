@@ -1,13 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from domain.exceptions import DatabaseError, AppError, InputError, NotFoundError
-from infrastructure.db.models import Event, Place
-from domain.models import EventEntity
-from domain.models import PlaceEntity
 from datetime import date
 import uuid
 import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+from domain.exceptions import DatabaseError, AppError, InputError, NotFoundError
+from domain.models import EventEntity
+from domain.models import PlaceEntity
+from infrastructure.db.models import Event, Place
+
 
 logger = logging.getLogger(__name__)
 

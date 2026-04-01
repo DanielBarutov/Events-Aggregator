@@ -1,4 +1,5 @@
 import asyncio
+
 from domain.exceptions import AppError, BusinessLogicError
 from infrastructure.repository.sync import SyncMetadataRepository
 from infrastructure.repository.events import EventsRepository

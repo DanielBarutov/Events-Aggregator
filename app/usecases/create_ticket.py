@@ -1,10 +1,12 @@
 from datetime import datetime
+import logging
+
 from infrastructure.repository.tickets import TicketsRepository
 from infrastructure.clients.events_provider import EventsProviderClient
 from infrastructure.repository.events import EventsRepository
 from domain.models import UserEntity, EventEntity
 from domain.exceptions import NotFoundError, ConflictError, AppError, BusinessLogicError
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ class TicketUsecase:
                     "Событие уже началось", details={"event_id": event_id}
                 )
             try:
-                result = self.client.create_ticket(
+                result = await self.client.create_ticket(
                     event_id, first_name, last_name, email, seat
                 )
             except Exception:
@@ -89,7 +91,7 @@ class TicketUsecase:
                     "Событие уже началось", details={"event_id": event_id}
                 )
             await self.tickets_repository.delete_ticket(ticket_id)
-            self.client.delete_ticket(event_id, ticket_id)
+            await self.client.delete_ticket(event_id, ticket_id)
             return {"success": True}
         except AppError:
             raise

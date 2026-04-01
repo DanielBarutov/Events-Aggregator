@@ -1,8 +1,10 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import uuid
+
 from sqlalchemy import String, Integer, ForeignKey, Column, DateTime
 from sqlalchemy.orm import DeclarativeBase, relationship
-from zoneinfo import ZoneInfo
+
 
 timezone_msk = ZoneInfo("Europe/Moscow")
 
