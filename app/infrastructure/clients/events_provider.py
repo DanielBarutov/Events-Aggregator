@@ -62,7 +62,7 @@ class EventsProviderClient:
         try:
             async with httpx.AsyncClient() as client:
                 url = f"{self.base_url}/api/events/{event_id}/register/"
-                response = client.request(
+                response = await client.request(
                     method="POST",
                     url=url,
                     headers=self.headers,
@@ -97,7 +97,7 @@ class EventsProviderClient:
         try:
             async with httpx.AsyncClient() as client:
                 url = f"{self.base_url}/api/events/{event_id}/unregister/"
-                response = client.request(
+                response = await client.request(
                     method="DELETE",
                     url=url,
                     headers=self.headers,
