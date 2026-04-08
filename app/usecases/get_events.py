@@ -2,7 +2,7 @@ from datetime import date
 import logging
 from urllib.parse import urljoin
 
-from app.setting import EVENTS_PROVIDER_SERVER
+from setting import EVENTS_PROVIDER_SERVER
 from domain.exceptions import AppError, BusinessLogicError, NotFoundError
 from infrastructure.cache.memory import MemoryCache
 
