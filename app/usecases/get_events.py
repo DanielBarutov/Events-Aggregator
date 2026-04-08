@@ -1,7 +1,8 @@
 from datetime import date
-import os
 import logging
+from urllib.parse import urljoin
 
+from app.setting import EVENTS_PROVIDER_SERVER
 from domain.exceptions import AppError, BusinessLogicError, NotFoundError
 from infrastructure.cache.memory import MemoryCache
 
@@ -13,6 +14,7 @@ cache = MemoryCache()
 class GetEventsUsecase:
     def __init__(self, repository) -> None:
         self.repository = repository
+        self.hostname = EVENTS_PROVIDER_SERVER
 
     async def execute(self, data_from: date, page: int, page_size: int):
         try:
@@ -37,13 +39,12 @@ class GetEventsUsecase:
             count = len(result)
             next_page = page + 1
             prev_page = page - 1
-            hostname = os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE")
             data_result = {
                 "count": count,
-                "next": f"{hostname}/api/events/?page={next_page}"
+                "next": urljoin(self.hostname, f"/api/events/?page={next_page}")
                 if next_page - 2 < (count // page_size)
                 else None,
-                "previous": f"{hostname}/api/events/?page={prev_page}"
+                "previous": urljoin(self.hostname, f"/api/events/?page={prev_page}")
                 if prev_page >= 1
                 else None,
                 "results": result[start:end],

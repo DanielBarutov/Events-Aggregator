@@ -1,19 +1,19 @@
-import os
 import logging
+from urllib.parse import urljoin
 
 import httpx
 
 from domain.exceptions import ExternalProviderError, AppError, InputError
 from shemas.event import EventListPydantic
-
+from setting import EVENTS_PROVIDER_SERVER, EVENTS_PROVIDER_API_KEY
 
 logger = logging.getLogger(__name__)
 
 
 class EventsProviderClient:
     def __init__(self):
-        self.base_url = os.getenv("EVENTS_PROVIDER_SERVER_URL_OUTSIDE")
-        self.headers = {"x-api-key": os.getenv("EVENTS_PROVIDER_API_KEY")}
+        self.base_url = EVENTS_PROVIDER_SERVER
+        self.headers = {"x-api-key": EVENTS_PROVIDER_API_KEY}
         self.date = "data_from=2000-01-01"
 
     async def get_events(self, url: str, date: str | None = None) -> EventListPydantic:
@@ -38,8 +38,8 @@ class EventsProviderClient:
 
     async def get_available_seats(self, event_id: str):
         try:
-            async with httpx.AsyncClient(base_url=self.base_url) as client:
-                url = f"{self.base_url}/api/events/{event_id}/seats/"
+            async with httpx.AsyncClient() as client:
+                url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
                 response = await client.get(url, headers=self.headers)
                 if response.status_code == 500:
                     raise InputError(
@@ -66,7 +66,7 @@ class EventsProviderClient:
     ):
         try:
             async with httpx.AsyncClient() as client:
-                url = f"{self.base_url}/api/events/{event_id}/register/"
+                url = urljoin(self.base_url, f"/api/events/{event_id}/register/")
                 response = await client.request(
                     method="POST",
                     url=url,
@@ -101,7 +101,7 @@ class EventsProviderClient:
     async def delete_ticket(self, event_id: str, ticket_id: str):
         try:
             async with httpx.AsyncClient() as client:
-                url = f"{self.base_url}/api/events/{event_id}/unregister/"
+                url = urljoin(self.base_url, f"/api/events/{event_id}/unregister/")
                 response = await client.request(
                     method="DELETE",
                     url=url,

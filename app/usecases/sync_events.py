@@ -20,12 +20,13 @@ class SyncEventsUsecase:
         self.sync_repository = sync_repository
         self.events_repository = events_repository
         self.uuid = str(uuid_lib.uuid4())
-        self.max_changed_at = datetime(2000, 1, 1, 0, 0, 0)
+        self.max_changed_at = datetime(2000, 1, 1, tzinfo=timezone.utc)
 
     async def execute(self):
         try:
             last_sync: SyncStatusEntity = await self.get_sync()
-            self.max_changed_at = last_sync.last_changed_at
+            self.max_changed_at = last_sync.last_changed_at.astimezone(timezone.utc)
+            sync_start_changed_at = last_sync.last_changed_at.astimezone(timezone.utc)
             await self.start_sync()
             paginator = EventsPaginator(
                 self.client, last_sync.last_changed_at.strftime("%Y-%m-%d")
@@ -35,12 +36,12 @@ class SyncEventsUsecase:
                     event_changed_at = datetime.fromisoformat(
                         event.get("changed_at")
                     ).astimezone(timezone.utc)
-                    if event_changed_at > self.max_changed_at:
+                    if event_changed_at > sync_start_changed_at:
                         await self.events_repository.sync(
                             EventsMapper(event).map_places(),
                             EventsMapper(event).map_events(),
                         )
-                        self.max_changed_at = event_changed_at
+                        self.max_changed_at = max(self.max_changed_at, event_changed_at)
 
         except AppError:
             await self.fail()

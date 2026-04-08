@@ -21,17 +21,22 @@ def test_get_events():
         inner_client.__aenter__ = AsyncMock(return_value=inner_client)
         inner_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("infrastructure.clients.events_provider.os.getenv") as getenv_mock:
-            getenv_mock.side_effect = lambda key: {
-                "EVENTS_PROVIDER_SERVER_URL_OUTSIDE": "http://api.example",
-                "EVENTS_PROVIDER_API_KEY": "secret",
-            }.get(key)
-            with patch(
+        with (
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_SERVER",
+                "http://api.example",
+            ),
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_API_KEY",
+                "secret",
+            ),
+            patch(
                 "infrastructure.clients.events_provider.httpx.AsyncClient",
                 return_value=inner_client,
-            ):
-                provider = EventsProviderClient()
-                data = await provider.get_events("http://api.example/api/events/")
+            ),
+        ):
+            provider = EventsProviderClient()
+            data = await provider.get_events("http://api.example/api/events/")
 
         assert data["next"] == "http://api.example/next"
         assert data["previous"] == "http://api.example/prev"
@@ -53,17 +58,22 @@ def test_get_available_seats_returns_seats_array():
         inner_client.__aenter__ = AsyncMock(return_value=inner_client)
         inner_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("infrastructure.clients.events_provider.os.getenv") as getenv_mock:
-            getenv_mock.side_effect = lambda key: {
-                "EVENTS_PROVIDER_SERVER_URL_OUTSIDE": "https://api.example",
-                "EVENTS_PROVIDER_API_KEY": "secret",
-            }.get(key)
-            with patch(
+        with (
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_SERVER",
+                "https://api.example",
+            ),
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_API_KEY",
+                "secret",
+            ),
+            patch(
                 "infrastructure.clients.events_provider.httpx.AsyncClient",
                 return_value=inner_client,
-            ):
-                provider = EventsProviderClient()
-                seats = await provider.get_available_seats("event-1")
+            ),
+        ):
+            provider = EventsProviderClient()
+            seats = await provider.get_available_seats("event-1")
 
         assert seats == ["A1", "A2"]
 
@@ -77,24 +87,29 @@ def test_create_ticket_wraps_transport_errors():
         inner_client.__aenter__ = AsyncMock(return_value=inner_client)
         inner_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("infrastructure.clients.events_provider.os.getenv") as getenv_mock:
-            getenv_mock.side_effect = lambda key: {
-                "EVENTS_PROVIDER_SERVER_URL_OUTSIDE": "https://api.example",
-                "EVENTS_PROVIDER_API_KEY": "secret",
-            }.get(key)
-            with patch(
+        with (
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_SERVER",
+                "https://api.example",
+            ),
+            patch(
+                "infrastructure.clients.events_provider.EVENTS_PROVIDER_API_KEY",
+                "secret",
+            ),
+            patch(
                 "infrastructure.clients.events_provider.httpx.AsyncClient",
                 return_value=inner_client,
-            ):
-                provider = EventsProviderClient()
-                try:
-                    await provider.create_ticket(
-                        "event-1", "Ivan", "Petrov", "test@test.com", "A1"
-                    )
-                except ExternalProviderError as exc:
-                    assert exc.code == 502
-                    assert "создании тикета" in exc.message
-                else:
-                    raise AssertionError("ExternalProviderError was expected")
+            ),
+        ):
+            provider = EventsProviderClient()
+            try:
+                await provider.create_ticket(
+                    "event-1", "Ivan", "Petrov", "test@test.com", "A1"
+                )
+            except ExternalProviderError as exc:
+                assert exc.code == 502
+                assert "создании тикета" in exc.message
+            else:
+                raise AssertionError("ExternalProviderError was expected")
 
     asyncio.run(run())

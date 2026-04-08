@@ -1,5 +1,29 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+
+
+class EventStatus(Enum):
+    NEW = "new"
+    PUBLISHED = "published"
+    REGISTRATION_CLOSED = "registration_closed"
+    FINISHED = "finished"
+
+    @classmethod
+    def from_string(cls, value: str) -> "EventStatus":
+        try:
+            return cls(value.lower())
+        except ValueError:
+            raise ValueError(f"Invalid event status: {value}")
+
+    def to_string(self) -> str:
+        return self.value
+
+
+class SyncStatus(Enum):
+    COMPLETED = "completed"
+    RUN = "run"
+    FAIL = "fail"
 
 
 @dataclass
@@ -21,7 +45,7 @@ class EventEntity:
     place: PlaceEntity
     event_time: datetime
     registration_deadline: datetime
-    status: str
+    status: EventStatus
     number_of_visitors: int
     changed_at: datetime
     created_at: datetime
@@ -33,7 +57,7 @@ class SyncStatusEntity:
     id: str
     last_sync_time: datetime
     last_changed_at: datetime
-    sync_status: str
+    sync_status: SyncStatus
 
 
 @dataclass

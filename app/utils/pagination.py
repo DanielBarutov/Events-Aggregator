@@ -1,10 +1,14 @@
+from urllib.parse import urljoin
+
 from infrastructure.clients.events_provider import EventsProviderClient
 
 
 class EventsPaginator:
     def __init__(self, client: EventsProviderClient, date: str | None = None):
         self.client = client
-        self.next_page_url = f"{self.client.base_url}/api/events/?data_from={date}"
+        self.next_page_url = urljoin(
+            self.client.base_url, f"/api/events/?data_from={date}"
+        )
 
     def __aiter__(self):
         return self

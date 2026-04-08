@@ -1,15 +1,12 @@
 from contextlib import asynccontextmanager
 import asyncio
 import logging
-from dotenv import load_dotenv
 
 from fastapi import FastAPI
 
 from api.router import router
 from api.exception_handlers import register_exception_handlers
 from service.sync_worker import run_sync_loop
-
-load_dotenv()
 
 
 logging.basicConfig(

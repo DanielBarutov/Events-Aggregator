@@ -18,7 +18,7 @@ def test_get_events_usecase_execute_sorts_desc_and_returns_page():
         newer = MagicMock(event_time=datetime(2026, 2, 1, tzinfo=timezone.utc))
         repo.get_events_with_places = AsyncMock(return_value=[older, newer])
 
-        with patch("usecases.get_events.os.getenv", return_value="https://example.com"):
+        with patch("usecases.get_events.EVENTS_PROVIDER_SERVER", "https://example.com"):
             result = await GetEventsUsecase(repo).execute(None, 1, 10)
 
         assert result["count"] == 2

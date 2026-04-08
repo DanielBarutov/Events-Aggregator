@@ -1,12 +1,26 @@
 from datetime import datetime
+from enum import Enum as EnumType
 from zoneinfo import ZoneInfo
 import uuid
 
-from sqlalchemy import String, Integer, ForeignKey, Column, DateTime
+from sqlalchemy import String, Integer, ForeignKey, Column, DateTime, Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
 timezone_msk = ZoneInfo("Europe/Moscow")
+
+
+class SyncStatus(EnumType):
+    completed = "completed"
+    run = "run"
+    fail = "fail"
+
+
+class EventStatus(EnumType):
+    new = "new"
+    published = "published"
+    registration_closed = "registration_closed"
+    finished = "finished"
 
 
 class Base(DeclarativeBase):
@@ -45,7 +59,7 @@ class Event(Base):
         DateTime(timezone=True),
         nullable=False,
     )
-    status = Column(String, nullable=True)
+    status = Column(Enum(EventStatus), nullable=True)
     number_of_visitors = Column(Integer, nullable=True)
     changed_at = Column(
         DateTime(timezone=True),
@@ -74,7 +88,7 @@ class SyncStatus(Base):
         nullable=False,
         default=datetime.now(timezone_msk),
     )
-    sync_status = Column(String, nullable=False)
+    sync_status = Column(Enum(SyncStatus), nullable=False)
 
 
 class User(Base):
