@@ -51,7 +51,7 @@ class EventsRepository:
                 place=self.to_place_entity(event.place),
                 event_time=event.event_time,
                 registration_deadline=event.registration_deadline,
-                status=event.status,
+                status=event.status.value,
                 number_of_visitors=event.number_of_visitors,
                 changed_at=event.changed_at,
                 created_at=event.created_at,
