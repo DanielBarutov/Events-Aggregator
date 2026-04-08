@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 async def run_sync_loop(usecase):
     try:
         while True:
-            await asyncio.sleep(10)
+            await asyncio.sleep(300)
             async with AsyncSessionLocal() as session:
                 sync_repo = SyncMetadataRepository(session)
                 events_repo = EventsRepository(session)
