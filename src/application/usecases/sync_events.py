@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import uuid as uuid_lib
 import logging
 
+
 from src.domain.exceptions import AppError, BusinessLogicError
 from src.domain.models import SyncStatusEntity
 from src.infrastructure.utils.pagination import EventsPaginator
