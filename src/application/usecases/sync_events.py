@@ -39,8 +39,8 @@ class SyncEventsUsecase:
                     ).astimezone(timezone.utc)
                     if event_changed_at > sync_start_changed_at:
                         await self.events_repository.sync(
-                            EventsMapper(event).map_places(),
                             EventsMapper(event).map_events(),
+                            EventsMapper(event).map_places(),
                         )
                         self.max_changed_at = max(self.max_changed_at, event_changed_at)
 

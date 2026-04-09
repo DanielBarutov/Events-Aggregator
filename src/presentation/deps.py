@@ -1,6 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import src.setting
 from src.infrastructure.repository.tickets import TicketsRepository
 from src.infrastructure.repository.sync import SyncMetadataRepository
 from src.infrastructure.repository.events import EventsRepository
@@ -48,7 +49,9 @@ def get_event_by_id_usecase(
 def get_event_seats_usecase(
     repository: EventsRepository = Depends(get_events_repository),
 ) -> GetEventSeatsUsecase:
-    client = EventsProviderClient()
+    client = EventsProviderClient(
+        src.setting.EVENTS_PROVIDER_SERVER, src.setting.EVENTS_PROVIDER_API_KEY
+    )
     return GetEventSeatsUsecase(repository, client)
 
 
@@ -56,7 +59,9 @@ def manual_trigger_sync(
     sync_repository: SyncMetadataRepository = Depends(sync_events_repository),
     events_repository: EventsRepository = Depends(get_events_repository),
 ) -> SyncEventsUsecase:
-    client = EventsProviderClient()
+    client = EventsProviderClient(
+        src.setting.EVENTS_PROVIDER_SERVER, src.setting.EVENTS_PROVIDER_API_KEY
+    )
     return SyncEventsUsecase(client, sync_repository, events_repository)
 
 
@@ -64,5 +69,7 @@ def get_tickets_usecase(
     event_repository: EventsRepository = Depends(get_events_repository),
     tickets_repository: TicketsRepository = Depends(get_tickets_repository),
 ) -> TicketUsecase:
-    client = EventsProviderClient()
+    client = EventsProviderClient(
+        src.setting.EVENTS_PROVIDER_SERVER, src.setting.EVENTS_PROVIDER_API_KEY
+    )
     return TicketUsecase(client, event_repository, tickets_repository)

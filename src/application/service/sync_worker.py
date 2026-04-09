@@ -1,5 +1,6 @@
 import asyncio
 
+import src.setting
 from src.domain.exceptions import AppError, BusinessLogicError
 from src.infrastructure.repository.sync import SyncMetadataRepository
 from src.infrastructure.repository.events import EventsRepository
@@ -15,12 +16,17 @@ logger = logging.getLogger(__name__)
 async def run_sync_loop(usecase):
     try:
         while True:
-            await asyncio.sleep(300)
+            await asyncio.sleep(10)
             async with AsyncSessionLocal() as session:
                 sync_repo = SyncMetadataRepository(session)
                 events_repo = EventsRepository(session)
                 usecase = SyncEventsUsecase(
-                    EventsProviderClient(), sync_repo, events_repo
+                    EventsProviderClient(
+                        src.setting.EVENTS_PROVIDER_SERVER,
+                        src.setting.EVENTS_PROVIDER_API_KEY,
+                    ),
+                    sync_repo,
+                    events_repo,
                 )
                 await usecase.execute()
             await asyncio.sleep(86390)

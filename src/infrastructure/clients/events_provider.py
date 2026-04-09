@@ -5,15 +5,14 @@ import httpx
 
 from src.domain.exceptions import ExternalProviderError, AppError, InputError
 from src.presentation.shemas.event import EventListPydantic
-from src.setting import EVENTS_PROVIDER_SERVER, EVENTS_PROVIDER_API_KEY
 
 logger = logging.getLogger(__name__)
 
 
 class EventsProviderClient:
-    def __init__(self):
-        self.base_url = EVENTS_PROVIDER_SERVER
-        self.headers = {"x-api-key": EVENTS_PROVIDER_API_KEY}
+    def __init__(self, provider_url, provider_key):
+        self.base_url = provider_url
+        self.headers = {"x-api-key": provider_key}
         self.date = "data_from=2000-01-01"
 
     async def get_events(self, url: str, date: str | None = None) -> EventListPydantic:
