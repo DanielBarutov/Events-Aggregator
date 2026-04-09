@@ -6,9 +6,9 @@ from src.infrastructure.repository.sync import SyncMetadataRepository
 from src.infrastructure.repository.events import EventsRepository
 from src.infrastructure.clients.events_provider import EventsProviderClient
 from src.infrastructure.db.session import get_session
-from src.usecases.sync_events import SyncEventsUsecase
-from src.usecases.create_ticket import TicketUsecase
-from src.usecases.get_events import (
+from src.application.usecases.sync_events import SyncEventsUsecase
+from src.application.usecases.create_ticket import TicketUsecase
+from src.application.usecases.get_events import (
     GetEventsUsecase,
     GetEventByIdUsecase,
     GetEventSeatsUsecase,

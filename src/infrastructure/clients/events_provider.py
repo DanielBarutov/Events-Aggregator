@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 import httpx
 
 from src.domain.exceptions import ExternalProviderError, AppError, InputError
-from src.shemas.event import EventListPydantic
+from src.presentation.shemas.event import EventListPydantic
 from src.setting import EVENTS_PROVIDER_SERVER, EVENTS_PROVIDER_API_KEY
 
 logger = logging.getLogger(__name__)

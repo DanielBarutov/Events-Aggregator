@@ -2,8 +2,6 @@ import logging
 
 from src.domain.models import PlaceEntity, EventEntity
 from src.domain.exceptions import AppError, DatabaseError
-from src.shemas.sync import SyncEventPydantic, SyncPlacePydantic
-
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +12,7 @@ class EventsMapper:
 
     def map_events(self) -> EventEntity:
         try:
-            event = SyncEventPydantic.model_validate(self.event_list)
+            event = self.event_list
             return EventEntity(
                 id=event.id,
                 name=event.name,
@@ -52,7 +50,7 @@ class EventsMapper:
 
     def map_places(self) -> PlaceEntity:
         try:
-            place = SyncPlacePydantic.model_validate(self.event_list["place"])
+            place = self.event_list["place"]
             return PlaceEntity(
                 id=place.id,
                 name=place.name,

@@ -4,9 +4,9 @@ import logging
 
 from fastapi import FastAPI
 
-from src.api.router import router
-from src.api.exception_handlers import register_exception_handlers
-from src.service.sync_worker import run_sync_loop
+from src.presentation.router import router
+from src.presentation.exception_handlers import register_exception_handlers
+from src.application.service.sync_worker import run_sync_loop
 
 
 logging.basicConfig(

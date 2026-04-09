@@ -4,7 +4,7 @@ import logging
 
 from src.domain.exceptions import AppError, BusinessLogicError
 from src.domain.models import SyncStatusEntity
-from src.utils.pagination import EventsPaginator
+from src.infrastructure.utils.pagination import EventsPaginator
 from src.infrastructure.clients.events_provider import EventsProviderClient
 from src.infrastructure.mapper.events import EventsMapper
 

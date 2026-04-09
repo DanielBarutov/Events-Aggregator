@@ -237,7 +237,6 @@ class EventsRepository:
             )
 
     async def sync(self, place: PlaceEntity, event: EventEntity) -> None:
-
         try:
             if place is None or event is None:
                 raise NotFoundError(

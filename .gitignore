@@ -11,3 +11,4 @@ wheels/
 .vscode/
 .env
 .ruff_cache/
+docker-compose.yml
