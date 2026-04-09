@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, Depends
 
 from api.deps import manual_trigger_sync
@@ -9,5 +11,5 @@ router = APIRouter(tags=["sync"])
 
 @router.post("/sync/trigger")
 async def trigger_sync(usecase: SyncEventsUsecase = Depends(manual_trigger_sync)):
-    await usecase.execute()
+    asyncio.create_task(usecase.execute())
     return {"status": "sync manual triggered successfully"}
