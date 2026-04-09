@@ -1,13 +1,13 @@
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
+import dataclasses
+import datetime
+import enum
 
 
-class EventStatus(Enum):
-    NEW = "new"
-    PUBLISHED = "published"
-    REGISTRATION_CLOSED = "registration_closed"
-    FINISHED = "finished"
+class EventStatus(enum.Enum):
+    new = "new"
+    published = "published"
+    registration_closed = "registration_closed"
+    finished = "finished"
 
     @classmethod
     def from_string(cls, value: str) -> "EventStatus":
@@ -20,59 +20,59 @@ class EventStatus(Enum):
         return self.value
 
 
-class SyncStatus(Enum):
-    COMPLETED = "completed"
-    RUN = "run"
-    FAIL = "fail"
+class SyncStatus(enum.Enum):
+    completed = "completed"
+    run = "run"
+    fail = "fail"
 
 
-@dataclass
+@dataclasses.dataclass
 class PlaceEntity:
     id: str
     name: str
     city: str
     address: str
     seats_pattern: str
-    changed_at: datetime
-    created_at: datetime
+    changed_at: datetime.datetime
+    created_at: datetime.datetime
 
 
-@dataclass
+@dataclasses.dataclass
 class EventEntity:
     id: str
     name: str
     place_id: str
     place: PlaceEntity
-    event_time: datetime
-    registration_deadline: datetime
+    event_time: datetime.datetime
+    registration_deadline: datetime.datetime
     status: EventStatus
     number_of_visitors: int
-    changed_at: datetime
-    created_at: datetime
-    status_changed_at: datetime
+    changed_at: datetime.datetime
+    created_at: datetime.datetime
+    status_changed_at: datetime.datetime
 
 
-@dataclass
+@dataclasses.dataclass
 class SyncStatusEntity:
     id: str
-    last_sync_time: datetime
-    last_changed_at: datetime
+    last_sync_time: datetime.datetime
+    last_changed_at: datetime.datetime
     sync_status: SyncStatus
 
 
-@dataclass
+@dataclasses.dataclass
 class UserEntity:
     id: str
     email: str
     first_name: str
     last_name: str
-    created_at: datetime
+    created_at: datetime.datetime
 
 
-@dataclass
+@dataclasses.dataclass
 class TicketEntity:
     id: str
     user_id: str
     event_id: str
     seat: str
-    created_at: datetime
+    created_at: datetime.datetime

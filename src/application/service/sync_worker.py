@@ -1,11 +1,7 @@
 import asyncio
+from collections.abc import Awaitable, Callable
 
-import src.setting
 from src.domain.exceptions import AppError, BusinessLogicError
-from src.infrastructure.repository.sync import SyncMetadataRepository
-from src.infrastructure.repository.events import EventsRepository
-from src.infrastructure.clients.events_provider import EventsProviderClient
-from src.infrastructure.db.session import AsyncSessionLocal
 from src.application.usecases.sync_events import SyncEventsUsecase
 
 import logging
@@ -13,22 +9,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def run_sync_loop(usecase):
+async def run_sync_loop(build_usecase: Callable[[], Awaitable[SyncEventsUsecase]]):
     try:
         while True:
             await asyncio.sleep(10)
-            async with AsyncSessionLocal() as session:
-                sync_repo = SyncMetadataRepository(session)
-                events_repo = EventsRepository(session)
-                usecase = SyncEventsUsecase(
-                    EventsProviderClient(
-                        src.setting.EVENTS_PROVIDER_SERVER,
-                        src.setting.EVENTS_PROVIDER_API_KEY,
-                    ),
-                    sync_repo,
-                    events_repo,
-                )
-                await usecase.execute()
+            usecase = await build_usecase()
+            await usecase.execute()
             await asyncio.sleep(86390)
     except AppError:
         raise

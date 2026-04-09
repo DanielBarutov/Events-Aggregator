@@ -1,12 +1,14 @@
 from src.domain.models import PlaceEntity, EventEntity
+from src.infrastructure.clients.dto.events import EventDTO, PlaceDTO
 
 
 class EventsMapper:
-    def __init__(self, event_list):
-        self.event_list = event_list
+    def __init__(self) -> None:
+        pass
 
-    def map_events(self) -> EventEntity:
-        event = self.event_list
+    def map_events(self, event_list) -> EventEntity:
+        event = EventDTO.model_validate(event_list)
+
         return EventEntity(
             id=event.id,
             name=event.name,
@@ -31,8 +33,8 @@ class EventsMapper:
             else None,
         )
 
-    def map_places(self) -> PlaceEntity:
-        place = self.event_list["place"]
+    def map_places(self, event_list) -> PlaceEntity:
+        place = PlaceDTO.model_validate(event_list["place"])
         return PlaceEntity(
             id=place.id,
             name=place.name,

@@ -10,6 +10,7 @@ from src.domain.exceptions import DatabaseError, AppError, InputError, NotFoundE
 from src.domain.models import EventEntity
 from src.domain.models import PlaceEntity
 from src.infrastructure.db.models import Event, Place
+from src.infrastructure.repository.mappers.repo_mapper import ModelMapper
 
 
 logger = logging.getLogger(__name__)
@@ -18,57 +19,7 @@ logger = logging.getLogger(__name__)
 class EventsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
-
-    def to_place_entity(self, place: Place) -> PlaceEntity:
-        return PlaceEntity(
-            id=place.id,
-            name=place.name,
-            city=place.city,
-            address=place.address,
-            seats_pattern=place.seats_pattern,
-            changed_at=place.changed_at,
-            created_at=place.created_at,
-        )
-
-    def to_event_entity(self, event: Event) -> EventEntity:
-        return EventEntity(
-            id=event.id,
-            name=event.name,
-            place_id=event.place_id,
-            place=self.to_place_entity(event.place),
-            event_time=event.event_time,
-            registration_deadline=event.registration_deadline,
-            status=event.status.value,
-            number_of_visitors=event.number_of_visitors,
-            changed_at=event.changed_at,
-            created_at=event.created_at,
-            status_changed_at=event.status_changed_at,
-        )
-
-    def to_place_model(self, place: PlaceEntity) -> Place:
-        return Place(
-            id=place.id,
-            name=place.name,
-            city=place.city,
-            address=place.address,
-            seats_pattern=place.seats_pattern,
-            changed_at=place.changed_at,
-            created_at=place.created_at,
-        )
-
-    def to_event_model(self, event: EventEntity) -> Event:
-        return Event(
-            id=event.id,
-            name=event.name,
-            place_id=event.place_id,
-            event_time=event.event_time,
-            registration_deadline=event.registration_deadline,
-            status=event.status,
-            number_of_visitors=event.number_of_visitors,
-            changed_at=event.changed_at,
-            created_at=event.created_at,
-            status_changed_at=event.status_changed_at,
-        )
+        self.mapper = ModelMapper()
 
     async def get_event(self, event_id) -> EventEntity:
         try:
@@ -95,7 +46,7 @@ class EventsRepository:
                 raise NotFoundError(
                     "Событие не найдено", details={"event_id": event_id}
                 )
-            return self.to_event_entity(event)
+            return self.mapper.to_event_entity(event)
         except AppError:
             raise
         except Exception:
@@ -115,7 +66,7 @@ class EventsRepository:
             )
             events = result.scalars().all()
 
-            return [self.to_event_entity(event) for event in events]
+            return [self.mapper.to_event_entity(event) for event in events]
         except AppError:
             raise
         except Exception as e:
@@ -127,76 +78,15 @@ class EventsRepository:
                 "Неизвестная ошибка при получении событий", details={"reason": str(e)}
             )
 
-    async def get_place(self, event_id) -> EventEntity:
-        try:
-            if event_id is None:
-                raise NotFoundError(
-                    "Событие не найдено", details={"event_id": event_id}
-                )
-            result = await self.session.execute(
-                select(Event)
-                .where(Event.id == event_id, Event.status == "published")
-                .join(Place)
-                .options(selectinload(Event.place))
-            )
-            place = result.scalar().place
-            return self.to_place_entity(place)
-        except AppError:
-            raise
-        except Exception as e:
-            logger.exception(
-                "Неизвестная ошибка при получении места",
-                extra={"event_id": event_id, "reason": str(e)},
-            )
-            raise DatabaseError(
-                "Неизвестная ошибка при получении места", details={"reason": str(e)}
-            )
-
-    async def delete_events(self, events: list[EventEntity]):
-        try:
-            if events is None:
-                raise NotFoundError("События не найдены", details={"events": events})
-            for event in events:
-                await self.session.delete(event)
-                await self.session.commit()
-        except AppError:
-            raise
-        except Exception as e:
-            logger.exception(
-                "Неизвестная ошибка при удалении событий",
-                extra={"events": events, "reason": str(e)},
-            )
-            raise DatabaseError(
-                "Неизвестная ошибка при удалении событий", details={"reason": str(e)}
-            )
-
-    async def get_last_changed_at(self):
-        try:
-            result = await self.session.execute(
-                select(Event.changed_at).order_by(Event.changed_at.desc()).limit(1)
-            )
-            return result.scalar()
-        except AppError:
-            raise
-        except Exception as e:
-            logger.exception(
-                "Неизвестная ошибка при получении последнего измененного времени",
-                details={"reason": str(e)},
-            )
-            raise DatabaseError(
-                "Неизвестная ошибка при получении последнего измененного времени",
-                details={"reason": str(e)},
-            )
-
-    async def sync(self, place: PlaceEntity, event: EventEntity) -> None:
+    async def sync(self, event: EventEntity, place: PlaceEntity) -> None:
         try:
             if place is None or event is None:
                 raise NotFoundError(
                     "Место или событие не найдены",
                     details={"place": place, "event": event},
                 )
-            m_place = self.to_place_model(place)
-            m_event = self.to_event_model(event)
+            m_place = self.mapper.to_place_model(place)
+            m_event = self.mapper.to_event_model(event)
             await self.session.merge(m_place)
             await self.session.merge(m_event)
             await self.session.commit()

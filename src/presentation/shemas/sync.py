@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from pydantic import BaseModel
 
@@ -9,18 +9,18 @@ class SyncPlacePydantic(BaseModel):
     city: str
     address: str
     seats_pattern: str
-    changed_at: datetime
-    created_at: datetime
+    changed_at: datetime.datetime
+    created_at: datetime.datetime
 
 
 class SyncEventPydantic(BaseModel):
     id: str
     name: str
     place: SyncPlacePydantic
-    event_time: datetime
-    registration_deadline: datetime
+    event_time: datetime.datetime
+    registration_deadline: datetime.datetime
     status: str
     number_of_visitors: int
-    changed_at: datetime
-    created_at: datetime
-    status_changed_at: datetime
+    changed_at: datetime.datetime
+    created_at: datetime.datetime
+    status_changed_at: datetime.datetime

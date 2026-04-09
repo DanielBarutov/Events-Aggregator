@@ -1,13 +1,15 @@
-from datetime import datetime, timezone
+import datetime
 import uuid as uuid_lib
 import logging
 
-
 from src.domain.exceptions import AppError, BusinessLogicError
 from src.domain.models import SyncStatusEntity
-from src.infrastructure.utils.pagination import EventsPaginator
-from src.infrastructure.clients.events_provider import EventsProviderClient
-from src.infrastructure.mapper.events import EventsMapper
+from src.application.ports.repo.sync_events_repo import SyncEventsRepositoryPort
+from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
+from src.application.ports.event_provider_port import (
+    EventProviderPort,
+    EventMapperPort,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -15,32 +17,43 @@ logger = logging.getLogger(__name__)
 
 class SyncEventsUsecase:
     def __init__(
-        self, client: EventsProviderClient, sync_repository, events_repository
+        self,
+        client: EventProviderPort,
+        mapper: EventMapperPort,
+        sync_repository: SyncEventsRepositoryPort,
+        events_repository: GetEventsRepositoryPort,
     ):
         self.client = client
+        self.mapper = mapper
         self.sync_repository = sync_repository
         self.events_repository = events_repository
         self.uuid = str(uuid_lib.uuid4())
-        self.max_changed_at = datetime(2000, 1, 1, tzinfo=timezone.utc)
+        self.max_changed_at = datetime.datetime(
+            2000, 1, 1, tzinfo=datetime.timezone.utc
+        )
 
     async def execute(self):
         try:
             last_sync: SyncStatusEntity = await self.get_sync()
-            self.max_changed_at = last_sync.last_changed_at.astimezone(timezone.utc)
-            sync_start_changed_at = last_sync.last_changed_at.astimezone(timezone.utc)
-            await self.start_sync()
-            paginator = EventsPaginator(
-                self.client, last_sync.last_changed_at.strftime("%Y-%m-%d")
+            self.max_changed_at = last_sync.last_changed_at.astimezone(
+                datetime.timezone.utc
             )
-            async for events in paginator:
+            sync_start_changed_at = last_sync.last_changed_at.astimezone(
+                datetime.timezone.utc
+            )
+            await self.start_sync()
+
+            async for events in self.client.iter_events(
+                last_sync.last_changed_at.strftime("%Y-%m-%d")
+            ):
                 for event in events:
-                    event_changed_at = datetime.fromisoformat(
+                    event_changed_at = datetime.datetime.fromisoformat(
                         event.get("changed_at")
-                    ).astimezone(timezone.utc)
+                    ).astimezone(datetime.timezone.utc)
                     if event_changed_at > sync_start_changed_at:
                         await self.events_repository.sync(
-                            EventsMapper(event).map_events(),
-                            EventsMapper(event).map_places(),
+                            self.mapper.map_events(event),
+                            self.mapper.map_places(event),
                         )
                         self.max_changed_at = max(self.max_changed_at, event_changed_at)
 

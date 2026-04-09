@@ -1,7 +1,9 @@
-from datetime import date
+import datetime
+import urllib
 
 from fastapi import APIRouter, Depends
 
+import src.setting
 from src.presentation.deps import (
     get_events_usecase,
     get_event_by_id_usecase,
@@ -19,12 +21,32 @@ router = APIRouter(tags=["events"])
 
 @router.get("/events", response_model=EventPaginationPydantic)
 async def get_events(
-    data_from: date | None = None,
+    data_from: datetime.date | None = None,
     page: int = 1,
     page_size: int = 20,
     usecase: GetEventsUsecase = Depends(get_events_usecase),
 ):
-    return await usecase.execute(data_from, page, page_size)
+    result = await usecase.execute(data_from)
+    start = (page - 1) * page_size
+    end = start + page_size
+    count = len(result)
+    next_page = page + 1
+    prev_page = page - 1
+    data_result = {
+        "count": count,
+        "next": urllib.parse.urljoin(
+            src.setting.EVENTS_PROVIDER_SERVER, f"/api/events/?page={next_page}"
+        )
+        if next_page - 2 < (count // page_size)
+        else None,
+        "previous": urllib.parse.urljoin(
+            src.setting.EVENTS_PROVIDER_SERVER, f"/api/events/?page={prev_page}"
+        )
+        if prev_page >= 1
+        else None,
+        "results": result[start:end],
+    }
+    return data_result
 
 
 @router.get("/events/{event_id}", response_model=EventPydantic)

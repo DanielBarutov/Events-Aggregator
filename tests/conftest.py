@@ -1,2 +1,7 @@
-# Общие настройки pytest: корень пакета приложения — каталог app (импорты вида `from api...`).
-# Дополнительно задаётся в [tool.pytest.ini_options] pythonpath в pyproject.toml.
+import sys
+import pathlib
+
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))

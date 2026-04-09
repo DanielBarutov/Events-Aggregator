@@ -4,9 +4,11 @@ from urllib.parse import urljoin
 import httpx
 
 from src.domain.exceptions import ExternalProviderError, AppError, InputError
-from src.presentation.shemas.event import EventListPydantic
+from src.infrastructure.clients.dto.events import EventListDTO
+from src.infrastructure.clients.cache.memory import MemoryCache
 
 logger = logging.getLogger(__name__)
+cache = MemoryCache()
 
 
 class EventsProviderClient:
@@ -14,8 +16,9 @@ class EventsProviderClient:
         self.base_url = provider_url
         self.headers = {"x-api-key": provider_key}
         self.date = "data_from=2000-01-01"
+        self.cache = cache
 
-    async def get_events(self, url: str, date: str | None = None) -> EventListPydantic:
+    async def get_events(self, url: str, date: str | None = None) -> EventListDTO:
         try:
             if date:
                 self.date = f"data_from={date}"
@@ -37,6 +40,9 @@ class EventsProviderClient:
 
     async def get_available_seats(self, event_id: str):
         try:
+            memory = cache.get(event_id)
+            if memory:
+                return memory
             async with httpx.AsyncClient() as client:
                 url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
                 response = await client.get(url, headers=self.headers)
@@ -47,7 +53,8 @@ class EventsProviderClient:
                     )
                 response.raise_for_status()
                 data = response.json()
-                return data["seats"]
+                cache.set(event_id, data.get("seats"), 60)
+                return data.get("seats")
         except AppError:
             raise
         except Exception as e:
@@ -119,3 +126,26 @@ class EventsProviderClient:
             raise ExternalProviderError(
                 "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}
             )
+
+    async def iter_events(self, date_from: str):
+        paginator = EventsPaginator(self, date_from)
+        async for page in paginator:
+            yield page
+
+
+class EventsPaginator:
+    def __init__(self, client: EventsProviderClient, date: str | None = None):
+        self.client = client
+        self.next_page_url = urljoin(
+            self.client.base_url, f"/api/events/?data_from={date}"
+        )
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if self.next_page_url is None:
+            raise StopAsyncIteration
+        data = await self.client.get_events(self.next_page_url)
+        self.next_page_url = data.get("next")
+        return data.get("results", [])

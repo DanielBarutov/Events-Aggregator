@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.deps import (
+from src.presentation.deps import (
     get_event_by_id_usecase,
     get_event_seats_usecase,
     get_events_usecase,
 )
-from src.api.v1.events import router as events_router
+from src.presentation.api.v1.events import router as events_router
 
 
 def _event_payload(event_id: str = "e1"):
@@ -31,15 +31,9 @@ def _event_payload(event_id: str = "e1"):
 
 def test_get_events_endpoint_uses_usecase_and_returns_page():
     class StubUsecase:
-        async def execute(self, data_from, page, page_size):
-            assert page == 1
-            assert page_size == 20
-            return {
-                "count": 1,
-                "next": None,
-                "previous": None,
-                "results": [_event_payload("e-list")],
-            }
+        async def execute(self, data_from):
+            assert data_from is None
+            return [_event_payload("e-list")]
 
     app = FastAPI()
     app.include_router(events_router, prefix="/api")

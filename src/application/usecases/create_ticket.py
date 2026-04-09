@@ -1,9 +1,9 @@
-from datetime import datetime
+import datetime
 import logging
 
-from src.infrastructure.repository.tickets import TicketsRepository
-from src.infrastructure.clients.events_provider import EventsProviderClient
-from src.infrastructure.repository.events import EventsRepository
+from src.application.ports.repo.tickets_repo import TicketsRepositoryPort
+from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
+from src.application.ports.event_provider_port import EventProviderPort
 from src.domain.models import UserEntity, EventEntity
 from src.domain.exceptions import (
     NotFoundError,
@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 class TicketUsecase:
     def __init__(
         self,
-        client: EventsProviderClient,
-        event_repository: EventsRepository,
-        tickets_repository: TicketsRepository,
+        client: EventProviderPort,
+        event_repository: GetEventsRepositoryPort,
+        tickets_repository: TicketsRepositoryPort,
     ):
         self.client = client
         self.event_repository = event_repository
@@ -49,7 +49,9 @@ class TicketUsecase:
                 raise ConflictError(
                     "Событие не опубликовано", details={"event_id": event_id}
                 )
-            if event.registration_deadline < datetime.now(event.event_time.tzinfo):
+            if event.registration_deadline < datetime.datetime.now(
+                event.event_time.tzinfo
+            ):
                 raise ConflictError(
                     "Событие уже началось", details={"event_id": event_id}
                 )
@@ -91,7 +93,7 @@ class TicketUsecase:
                 raise ConflictError(
                     "Событие не опубликовано", details={"event_id": event_id}
                 )
-            if event.event_time < datetime.now(event.event_time.tzinfo):
+            if event.event_time < datetime.datetime.now(event.event_time.tzinfo):
                 raise ConflictError(
                     "Событие уже началось", details={"event_id": event_id}
                 )

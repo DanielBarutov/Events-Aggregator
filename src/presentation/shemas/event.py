@@ -1,18 +1,18 @@
-from datetime import datetime
-from enum import Enum
-from zoneinfo import ZoneInfo
+import datetime
+import enum
+import zoneinfo
 import uuid
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-MSK_TZ = ZoneInfo("Europe/Moscow")
+MSK_TZ = zoneinfo.ZoneInfo("Europe/Moscow")
 
 
-class EventStatusPydantic(Enum):
-    NEW = "new"
-    PUBLISHED = "published"
-    REGISTRATION_CLOSED = "registration_closed"
-    FINISHED = "finished"
+class EventStatusPydantic(enum.Enum):
+    new = "new"
+    published = "published"
+    registration_closed = "registration_closed"
+    finished = "finished"
 
 
 class PlacePydantic(BaseModel):
@@ -27,8 +27,8 @@ class EventPydantic(BaseModel):
     id: str
     name: str
     place: PlacePydantic
-    event_time: datetime
-    registration_deadline: datetime
+    event_time: datetime.datetime
+    registration_deadline: datetime.datetime
     status: EventStatusPydantic
     number_of_visitors: int
 

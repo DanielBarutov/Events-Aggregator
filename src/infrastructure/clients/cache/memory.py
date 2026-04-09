@@ -1,6 +1,7 @@
-from typing import Any
+import typing
 import logging
 import time
+
 
 from src.domain.exceptions import AppError, CacheError
 
@@ -8,9 +9,9 @@ from src.domain.exceptions import AppError, CacheError
 logger = logging.getLogger(__name__)
 
 
-class MemoryCache:
+class MemoryCache(typing.Protocol):
     def __init__(self):
-        self._storage: dict[str, tuple[Any, float]] = {}
+        self._storage: dict[str, tuple[typing.Any, float]] = {}
 
     def get(self, key: str):
         try:
@@ -37,7 +38,7 @@ class MemoryCache:
                 "Неизвестная ошибка при получении из кэша", details={"reason": str(e)}
             )
 
-    def set(self, key: str, value: Any, ttl: int):
+    def set(self, key: str, value: typing.Any, ttl: int):
         try:
             expires_at = time.time() + ttl
             self._storage[key] = (value, expires_at)

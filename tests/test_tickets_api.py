@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.deps import get_tickets_usecase
-from src.api.v1.tickets import router as tickets_router
+from src.presentation.deps import get_tickets_usecase
+from src.presentation.api.v1.tickets import router as tickets_router
 
 
 def test_create_ticket_endpoint_passes_request_body_to_usecase():

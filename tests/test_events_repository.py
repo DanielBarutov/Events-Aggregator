@@ -17,16 +17,16 @@ def mock_session():
     return session
 
 
-def test_create_events_adds_all_and_commits(mock_session):
+def test_sync_merges_place_and_event_and_commits(mock_session):
     async def run():
         repo = EventsRepository(mock_session)
         place_entity = MagicMock()
         event_entity = MagicMock()
 
-        repo.to_place_model = MagicMock(return_value="PLACE_MODEL")
-        repo.to_event_model = MagicMock(return_value="EVENT_MODEL")
+        repo.mapper.to_place_model = MagicMock(return_value="PLACE_MODEL")
+        repo.mapper.to_event_model = MagicMock(return_value="EVENT_MODEL")
 
-        await repo.sync(place_entity, event_entity)
+        await repo.sync(event_entity, place_entity)
 
         mock_session.merge.assert_any_await("PLACE_MODEL")
         mock_session.merge.assert_any_await("EVENT_MODEL")
@@ -62,18 +62,5 @@ def test_get_event_raises_input_error_for_invalid_uuid(mock_session):
             assert exc.code == 400
         else:
             raise AssertionError("InputError was expected")
-
-    asyncio.run(run())
-
-
-def test_get_last_changed_at_returns_scalar_value(mock_session):
-    async def run():
-        result = MagicMock()
-        result.scalar.return_value = "2026-03-31T10:00:00"
-        mock_session.execute = AsyncMock(return_value=result)
-
-        repo = EventsRepository(mock_session)
-        out = await repo.get_last_changed_at()
-        assert out == "2026-03-31T10:00:00"
 
     asyncio.run(run())

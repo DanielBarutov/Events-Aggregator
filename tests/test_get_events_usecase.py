@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from src.domain.exceptions import NotFoundError
-from src.usecases.get_events import (
+from src.application.usecases.get_events import (
     GetEventByIdUsecase,
     GetEventSeatsUsecase,
     GetEventsUsecase,
@@ -17,13 +17,11 @@ def test_get_events_usecase_execute_sorts_desc_and_returns_page():
         older = MagicMock(event_time=datetime(2026, 1, 1, tzinfo=timezone.utc))
         newer = MagicMock(event_time=datetime(2026, 2, 1, tzinfo=timezone.utc))
         repo.get_events_with_places = AsyncMock(return_value=[older, newer])
+        result = await GetEventsUsecase(repo).execute(None)
 
-        with patch("usecases.get_events.EVENTS_PROVIDER_SERVER", "https://example.com"):
-            result = await GetEventsUsecase(repo).execute(None, 1, 10)
-
-        assert result["count"] == 2
-        assert result["results"][0] is newer
-        assert result["results"][1] is older
+        assert len(result) == 2
+        assert result[0] is newer
+        assert result[1] is older
 
     asyncio.run(run())
 
