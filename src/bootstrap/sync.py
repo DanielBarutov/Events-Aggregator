@@ -11,8 +11,6 @@ from src.infrastructure.repository.sync import SyncMetadataRepository
 
 def make_build_sync_usecase() -> Callable[[], Awaitable[SyncEventsUsecase]]:
     async def build_sync_usecase() -> SyncEventsUsecase:
-        # Вариант A: если usecase сам не закрывает session, лучше UoW/контекст на execute
-
         async with AsyncSessionLocal() as session:
             client = EventsProviderClient(
                 src.setting.EVENTS_PROVIDER_SERVER,
