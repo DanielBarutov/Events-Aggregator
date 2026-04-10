@@ -32,7 +32,7 @@ class SyncEventsUsecase:
             2000, 1, 1, tzinfo=datetime.timezone.utc
         )
 
-    async def execute(self):
+    async def execute(self) -> None:
         try:
             last_sync: SyncStatusEntity = await self.get_sync()
             self.max_changed_at = last_sync.last_changed_at.astimezone(
@@ -74,18 +74,18 @@ class SyncEventsUsecase:
         else:
             await self.end()
 
-    async def start_sync(self):
+    async def start_sync(self) -> None:
         logger.info("Начата сихронизация")
         return await self.sync_repository.create(self.uuid, "run")
 
-    async def get_sync(self):
+    async def get_sync(self) -> None:
         return await self.sync_repository.get()
 
-    async def end(self):
+    async def end(self) -> None:
         logger.info("Завершена синхранизация")
         return await self.sync_repository.update(
             self.uuid, "completed", self.max_changed_at
         )
 
-    async def fail(self):
+    async def fail(self) -> None:
         return await self.sync_repository.update(self.uuid, "fail")

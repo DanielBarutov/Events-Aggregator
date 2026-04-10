@@ -1,22 +1,22 @@
-from datetime import datetime
-from enum import Enum as EnumType
-from zoneinfo import ZoneInfo
+import datetime
+import enum
+import zoneinfo
 import uuid
 
 from sqlalchemy import String, Integer, ForeignKey, Column, DateTime, Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
-timezone_msk = ZoneInfo("Europe/Moscow")
+timezone_msk = zoneinfo.ZoneInfo("Europe/Moscow")
 
 
-class SyncStatus(EnumType):
+class SyncStatus(enum.Enum):
     completed = "completed"
     run = "run"
     fail = "fail"
 
 
-class EventStatus(EnumType):
+class EventStatus(enum.Enum):
     new = "new"
     published = "published"
     registration_closed = "registration_closed"
@@ -81,12 +81,12 @@ class SyncStatus(Base):
     last_sync_time = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.now(timezone_msk),
+        default=datetime.datetime.now(timezone_msk),
     )
     last_changed_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.now(timezone_msk),
+        default=datetime.datetime.now(timezone_msk),
     )
     sync_status = Column(Enum(SyncStatus), nullable=False)
 
@@ -101,7 +101,7 @@ class User(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.now(timezone_msk),
+        default=datetime.datetime.now(timezone_msk),
     )
 
 
@@ -112,6 +112,8 @@ class Ticket(Base):
     event_id = Column(String, ForeignKey("events.id"), nullable=False)
     seat = Column(String, nullable=False)
     created_at = Column(
-        DateTime(timezone=True), nullable=False, default=datetime.now(timezone_msk)
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.datetime.now(timezone_msk),
     )
     user = relationship("User", foreign_keys=[user_id], back_populates="tickets")

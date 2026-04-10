@@ -29,7 +29,7 @@ class TicketUsecase:
 
     async def create(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
-    ):
+    ) -> dict:
         try:
             available_seats = await self.client.get_available_seats(event_id)
             if seat not in available_seats:
@@ -84,7 +84,7 @@ class TicketUsecase:
                 "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
             )
 
-    async def delete(self, ticket_id: str):
+    async def delete(self, ticket_id: str) -> dict:
         try:
             event_data = await self.tickets_repository.get_ticket(ticket_id)
             event_id = event_data.event_id

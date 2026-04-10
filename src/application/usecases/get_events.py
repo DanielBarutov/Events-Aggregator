@@ -35,7 +35,7 @@ class GetEventByIdUsecase:
     def __init__(self, repository: GetEventsRepositoryPort) -> None:
         self.repository = repository
 
-    async def execute(self, event_id):
+    async def execute(self, event_id) -> dict:
         return await self.repository.get_event(event_id)
 
 
@@ -46,16 +46,19 @@ class GetEventSeatsUsecase:
         self.repository = repository
         self.client = client
 
-    async def execute(self, event_id):
+    async def execute(self, event_id) -> dict:
         try:
             event = await self.repository.get_event(event_id)
-            if event and event.status == "published":
-                available_seats = await self.client.get_available_seats(event_id)
-                result = {"event_id": event_id, "available_seats": available_seats}
-            else:
+            if not event:
                 raise NotFoundError(
                     "Событие не найдено", details={"event_id": event_id}
                 )
+            if event.status != "published":
+                raise NotFoundError(
+                    "Событие не имеет статус published", details={"event_id": event_id}
+                )
+            available_seats = await self.client.get_available_seats(event_id)
+            result = {"event_id": event_id, "available_seats": available_seats}
             return result
         except AppError:
             raise
