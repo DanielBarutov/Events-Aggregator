@@ -1,7 +1,7 @@
 import logging
-# from urllib.parse import urljoin
+from urllib.parse import urljoin
 
-# import httpx
+import httpx
 
 
 logger = logging.getLogger(__name__)
@@ -10,8 +10,19 @@ logger = logging.getLogger(__name__)
 class OutboxProviderClient:
     def __init__(self, provider_url, provider_key):
         self.base_url = provider_url
-        self.headers = {"x-api-key": provider_key}
-        self.date = "data_from=2000-01-01"
+        self.provider_key = provider_key
 
-    async def execute(self):
-        pass
+    async def execute(self, payload):
+        try:
+            async with httpx.AsyncClient() as client:
+                url = urljoin(self.base_url, "/api/notifications")
+                header = {
+                    "Content-Type": "application/json",
+                    "x-api-key": self.provider_key,
+                }
+                response = await client.post(url=url, headers=header, json=payload)
+                response.raise_for_status()
+                data = response.json()
+                return data
+        except Exception as e:
+            raise e

@@ -86,7 +86,7 @@ class Event(Base):
 
 class SyncStatus(Base):
     __tablename__ = "sync_status"
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     last_sync_time = Column(
         DateTime(timezone=True),
         nullable=False,
@@ -102,7 +102,7 @@ class SyncStatus(Base):
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -116,7 +116,7 @@ class User(Base):
 
 class Ticket(Base):
     __tablename__ = "tickets"
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     event_id = Column(String, ForeignKey("events.id"), nullable=False)
     seat = Column(String, nullable=False)
@@ -130,7 +130,7 @@ class Ticket(Base):
 
 class Outbox(Base):
     __tablename__ = "outbox"
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     type_event = Column(Enum(TypeEvent), nullable=False)
     payload = Column(JSON, nullable=True)
     status = Column(Enum(OutboxStatus), nullable=False)

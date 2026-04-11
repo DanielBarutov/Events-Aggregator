@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.infrastructure.db.models import User, Ticket, Outbox
+from src.infrastructure.db.models import OutboxStatus, User, Ticket, Outbox
 from src.domain.models import OutboxEntity, TicketEntity, UserEntity
 from src.domain.exceptions import DatabaseError, AppError, NotFoundError
 
@@ -214,5 +214,21 @@ class TicketsRepository:
                 )
                 for outbox in outboxes
             ]
+        except Exception as e:
+            raise e
+
+    async def change_outbox_status(self, outbox_id: str) -> None:
+        try:
+            data = await self.session.execute(
+                select(Outbox).where(Outbox.id == outbox_id)
+            )
+            outbox: Outbox = data.scalar()
+            if not outbox:
+                raise NotFoundError(
+                    "При смене статуса у outbox, не был найден outbox в БД"
+                )
+            outbox.status = OutboxStatus.sent
+            await self.session.commit()
+            await self.session.refresh()
         except Exception as e:
             raise e

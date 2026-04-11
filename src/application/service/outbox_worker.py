@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]]):
     try:
         while True:
-            await asyncio.sleep(2)
+            await asyncio.sleep(5)
             async with AsyncSessionLocal() as session:
                 usecase = await build_usecase(session)
                 await usecase.execute()
@@ -22,10 +22,6 @@ async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]])
     except AppError:
         raise
     except Exception as e:
-        logger.exception(
-            "Неизвестная ошибка проверки Outbox",
-            extra={"usecase": usecase},
-        )
         raise BusinessLogicError(
             "Неизвестная ошибка проверки Outbox",
             details={"reason": str(e)},

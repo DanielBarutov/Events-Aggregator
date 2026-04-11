@@ -5,6 +5,7 @@ import logging
 from src.application.ports.repo.tickets_repo import TicketsRepositoryPort
 from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
 from src.application.ports.event_provider_port import EventProviderPort
+from src.application.ports.outbox_provider_port import OutboxProviderPort
 from src.domain.models import UserEntity, EventEntity
 from src.domain.exceptions import (
     NotFoundError,
@@ -120,18 +121,20 @@ class TicketUsecase:
 
 
 class OutboxUsecase:
-    def __init__(self, repository: TicketsRepositoryPort) -> None:
+    def __init__(
+        self, repository: TicketsRepositoryPort, client: OutboxProviderPort
+    ) -> None:
         self.repository = repository
-        # self.client = client
+        self.client = client
 
     async def execute(self):
         result = await self.repository.get_outbox()
-        if result is None:
+        if not result:
             return
         for i in result:
             try:
-                # self.client.execute(i.event_id, i.name)
-                # Смена статуса в базу
-                print(i)
-            except Exception:
-                pass
+                await self.client.execute(i.payload)
+                await self.repository.change_outbox_status(i.id)
+                logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
+            except Exception as e:
+                raise e
