@@ -142,7 +142,7 @@ class Outbox(Base):
 
 
 class IdempotencyKeys(Base):
-    __table__ = "idempotency_keys"
+    __tablename__ = "idempotency_keys"
     id = Column(Integer, primary_key=True)
     key = Column(String, unique=True, nullable=False)
     request_hash = Column(String)
