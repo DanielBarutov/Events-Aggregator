@@ -5,8 +5,9 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.infrastructure.db.models import User, Ticket
-from src.domain.models import TicketEntity, UserEntity
+
+from src.infrastructure.db.models import User, Ticket, Outbox
+from src.domain.models import OutboxEntity, TicketEntity, UserEntity
 from src.domain.exceptions import DatabaseError, AppError, NotFoundError
 
 
@@ -63,7 +64,7 @@ class TicketsRepository:
             )
 
     async def create_ticket(
-        self, ticket_id: str, user_id: str, event_id: str, seat: str
+        self, ticket_id: str, user_id: str, event_id: str, seat: str, payload: dict
     ) -> TicketEntity:
         try:
             if ticket_id is None:
@@ -87,6 +88,14 @@ class TicketsRepository:
                     user_id=user_id,
                     event_id=event_id,
                     seat=seat,
+                    created_at=created_at,
+                )
+            )
+            self.session.add(
+                Outbox(
+                    type_event="buying",
+                    payload=payload,
+                    status="awaits",
                     created_at=created_at,
                 )
             )
@@ -190,3 +199,20 @@ class TicketsRepository:
             raise DatabaseError(
                 "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}
             )
+
+    async def get_outbox(self) -> list[OutboxEntity] | None:
+        try:
+            data = await self.session.execute(select(Outbox))
+            outboxes = data.scalars().all()
+            return [
+                OutboxEntity(
+                    id=outbox.id,
+                    type_event=outbox.type_event,
+                    payload=outbox.payload,
+                    status=outbox.status,
+                    created_at=outbox.created_at,
+                )
+                for outbox in outboxes
+            ]
+        except Exception as e:
+            raise e

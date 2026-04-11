@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+
 from src.application.ports.repo.tickets_repo import TicketsRepositoryPort
 from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
 from src.application.ports.event_provider_port import EventProviderPort
@@ -62,11 +63,17 @@ class TicketUsecase:
             except Exception:
                 raise ConflictError(
                     "Место занято или вы уже зарегистрированны на это событие",
-                    details={"event_id": event_id},
+                    details={
+                        "event_id": event_id,
+                    },
                 )
             if result:
+                payload = {
+                    "message": f"Вы успешно зарегистрированы на мероприятие - {event.name}",
+                    "reference_id": result.get("ticket_id"),
+                }
                 await self.tickets_repository.create_ticket(
-                    result.get("ticket_id"), user.id, event_id, seat
+                    result.get("ticket_id"), user.id, event_id, seat, payload
                 )
                 return result
             else:
@@ -110,3 +117,21 @@ class TicketUsecase:
             raise BusinessLogicError(
                 "Неизвестная ошибка при удалении тикета", details={"reason": str(e)}
             )
+
+
+class OutboxUsecase:
+    def __init__(self, repository: TicketsRepositoryPort) -> None:
+        self.repository = repository
+        # self.client = client
+
+    async def execute(self):
+        result = await self.repository.get_outbox()
+        if result is None:
+            return
+        for i in result:
+            try:
+                # self.client.execute(i.event_id, i.name)
+                # Смена статуса в базу
+                print(i)
+            except Exception:
+                pass

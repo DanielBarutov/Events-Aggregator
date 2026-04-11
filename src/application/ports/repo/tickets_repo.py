@@ -1,6 +1,6 @@
 import typing
 
-from src.domain.models import UserEntity, TicketEntity
+from src.domain.models import OutboxEntity, UserEntity, TicketEntity
 
 
 class TicketsRepositoryPort(typing.Protocol):
@@ -9,7 +9,7 @@ class TicketsRepositoryPort(typing.Protocol):
     ) -> UserEntity: ...
 
     async def create_ticket(
-        self, ticket_id: str, user_id: str, event_id: str, seat: str
+        self, ticket_id: str, user_id: str, event_id: str, seat: str, payload: dict
     ) -> TicketEntity: ...
 
     async def get_ticket(self, ticket_id: str) -> TicketEntity: ...
@@ -17,3 +17,5 @@ class TicketsRepositoryPort(typing.Protocol):
     async def get_user(self, email: str) -> UserEntity | None: ...
 
     async def delete_ticket(self, ticket_id: str) -> None: ...
+
+    async def get_outbox(self) -> list[OutboxEntity]: ...

@@ -3,7 +3,7 @@ import enum
 import zoneinfo
 import uuid
 
-from sqlalchemy import String, Integer, ForeignKey, Column, DateTime, Enum
+from sqlalchemy import JSON, String, Integer, ForeignKey, Column, DateTime, Enum
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -21,6 +21,15 @@ class EventStatus(enum.Enum):
     published = "published"
     registration_closed = "registration_closed"
     finished = "finished"
+
+
+class TypeEvent(enum.Enum):
+    buying = "buying"
+
+
+class OutboxStatus(enum.Enum):
+    awaits = "awaits"
+    sent = "sent"
 
 
 class Base(DeclarativeBase):
@@ -117,3 +126,16 @@ class Ticket(Base):
         default=datetime.datetime.now(timezone_msk),
     )
     user = relationship("User", foreign_keys=[user_id], back_populates="tickets")
+
+
+class Outbox(Base):
+    __tablename__ = "outbox"
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    type_event = Column(Enum(TypeEvent), nullable=False)
+    payload = Column(JSON, nullable=True)
+    status = Column(Enum(OutboxStatus), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.datetime.now(timezone_msk),
+    )

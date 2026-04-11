@@ -1,6 +1,7 @@
 import dataclasses
 import datetime
 import enum
+import json
 
 
 class EventStatus(enum.Enum):
@@ -24,6 +25,15 @@ class SyncStatus(enum.Enum):
     completed = "completed"
     run = "run"
     fail = "fail"
+
+
+class OutboxTypeEvent(enum.Enum):
+    buying = "buying"
+
+
+class OutboxStatus(enum.Enum):
+    awaits = "awaits"
+    sent = "sent"
 
 
 @dataclasses.dataclass
@@ -75,4 +85,13 @@ class TicketEntity:
     user_id: str
     event_id: str
     seat: str
+    created_at: datetime.datetime
+
+
+@dataclasses.dataclass
+class OutboxEntity:
+    id: str
+    type_event: OutboxTypeEvent
+    payload: json
+    status: OutboxStatus
     created_at: datetime.datetime
