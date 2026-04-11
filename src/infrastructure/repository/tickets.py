@@ -6,8 +6,19 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.infrastructure.db.models import OutboxStatus, User, Ticket, Outbox
-from src.domain.models import OutboxEntity, TicketEntity, UserEntity
+from src.infrastructure.db.models import (
+    IdempotencyKeys,
+    OutboxStatus,
+    User,
+    Ticket,
+    Outbox,
+)
+from src.domain.models import (
+    OutboxEntity,
+    TicketEntity,
+    UserEntity,
+    IdempotencyKeysEntity,
+)
 from src.domain.exceptions import DatabaseError, AppError, NotFoundError
 
 
@@ -108,6 +119,7 @@ class TicketsRepository:
                 created_at=created_at,
             )
         except AppError:
+            await self.session.rollback()
             raise
         except Exception as e:
             logger.exception(
@@ -190,6 +202,7 @@ class TicketsRepository:
             await self.session.delete(ticket)
             await self.session.commit()
         except AppError:
+            await self.session.rollback()
             raise
         except Exception as e:
             logger.exception(
@@ -230,5 +243,40 @@ class TicketsRepository:
             outbox.status = OutboxStatus.sent
             await self.session.commit()
             await self.session.refresh()
+        except Exception as e:
+            await self.session.rollback()
+            raise e
+
+    async def set_idempotency(
+        self, idempotency_key: str, request_hash: str, ticket_id: str
+    ) -> None:
+        try:
+            data = IdempotencyKeys(
+                key=idempotency_key, request_hash=request_hash, ticket_id=ticket_id
+            )
+            await self.session.add(data)
+            await self.session.commit()
+            logger.info(
+                f"Записан ключ с данными: {idempotency_key} : {request_hash} : {ticket_id}"
+            )
+        except Exception as e:
+            await self.session.rollback()
+            raise e
+
+    async def get_idempotency(self, idempotency_key: str) -> IdempotencyKeysEntity:
+        try:
+            data = await self.session.execute(
+                select(IdempotencyKeys).where(IdempotencyKeys.key == idempotency_key)
+            )
+            idempotency_obj = data.scalar()
+            if not idempotency_obj:
+                return None
+            return IdempotencyKeysEntity(
+                id=idempotency_obj.id,
+                key=idempotency_obj.key,
+                request_hash=idempotency_obj.request_hash,
+                ticket_id=idempotency_obj.ticked_id,
+                created_at=idempotency_obj.created_at,
+            )
         except Exception as e:
             raise e

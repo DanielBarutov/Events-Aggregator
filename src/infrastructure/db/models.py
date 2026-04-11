@@ -139,3 +139,16 @@ class Outbox(Base):
         nullable=False,
         default=datetime.datetime.now(timezone_msk),
     )
+
+
+class IdempotencyKeys(Base):
+    __table__ = "idempotency_keys"
+    id = Column(Integer, primary_key=True)
+    key = Column(String, unique=True, nullable=False)
+    request_hash = Column(String)
+    ticked_id = Column(String)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.datetime.now(timezone_msk),
+    )

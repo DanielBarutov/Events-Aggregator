@@ -95,3 +95,12 @@ class OutboxEntity:
     payload: json
     status: OutboxStatus
     created_at: datetime.datetime
+
+
+@dataclasses.dataclass
+class IdempotencyKeysEntity:
+    id: int
+    key: str
+    request_hash: str
+    ticket_id: str
+    created_at: datetime.datetime

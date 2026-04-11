@@ -1,12 +1,19 @@
 import datetime
 import logging
+import hashlib
+import json
 
 
 from src.application.ports.repo.tickets_repo import TicketsRepositoryPort
 from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
 from src.application.ports.event_provider_port import EventProviderPort
 from src.application.ports.outbox_provider_port import OutboxProviderPort
-from src.domain.models import UserEntity, EventEntity
+from src.domain.models import (
+    IdempotencyKeysEntity,
+    TicketEntity,
+    UserEntity,
+    EventEntity,
+)
 from src.domain.exceptions import (
     NotFoundError,
     ConflictError,
@@ -30,9 +37,27 @@ class TicketUsecase:
         self.tickets_repository = tickets_repository
 
     async def create(
-        self, event_id: str, first_name: str, last_name: str, email: str, seat: str
+        self,
+        event_id: str,
+        first_name: str,
+        last_name: str,
+        email: str,
+        seat: str,
+        idempotency_key: str,
     ) -> dict:
         try:
+            if idempotency_key:
+                request_hash = self._generate_request_hash(
+                    event_id, first_name, last_name, email, seat
+                )
+                resolve = await self._resolver_idempotency(
+                    idempotency_key, request_hash
+                )
+
+            if resolve:
+                ticket: TicketEntity = self.tickets_repository.get_ticket()
+                return {"ticket_id": ticket.id}
+
             available_seats = await self.client.get_available_seats(event_id)
             if seat not in available_seats:
                 raise ConflictError("Место не доступно", details={"event_id": event_id})
@@ -61,26 +86,23 @@ class TicketUsecase:
                 result = await self.client.create_ticket(
                     event_id, first_name, last_name, email, seat
                 )
-            except Exception:
-                raise ConflictError(
-                    "Место занято или вы уже зарегистрированны на это событие",
-                    details={
-                        "event_id": event_id,
-                    },
-                )
+            except Exception as e:
+                raise e
+
             if result:
                 payload = {
                     "message": f"Вы успешно зарегистрированы на мероприятие - {event.name}",
                     "reference_id": result.get("ticket_id"),
+                    "idempotency_key": idempotency_key if idempotency_key else None,
                 }
                 await self.tickets_repository.create_ticket(
                     result.get("ticket_id"), user.id, event_id, seat, payload
                 )
-                return result
-            else:
-                raise ConflictError(
-                    "Не удалось создать тикет", details={"event_id": event_id}
+                await self.tickets_repository.set_idempotency(
+                    idempotency_key, request_hash, result.get("ticket_id")
                 )
+                return result
+
         except AppError:
             raise
         except Exception as e:
@@ -91,6 +113,32 @@ class TicketUsecase:
             raise BusinessLogicError(
                 "Неизвестная ошибка при создании тикета", details={"reason": str(e)}
             )
+
+    def _generate_request_hash(self, event_id, first_name, last_name, email, seat):
+        request_data = {
+            "event_id": event_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "seat": seat,
+        }
+        serialize_data = json.dumps(request_data, sort_keys=True).encode("utf-8")
+        return hashlib.sha256(serialize_data).hexdigest()
+
+    async def _resolver_idempotency(self, idempotency_key, request_hash):
+        data: IdempotencyKeysEntity = await self.tickets_repository.get_idempotency(
+            idempotency_key
+        )
+        # Сверяем if idempotency_key == BD idempotency_key:
+        if idempotency_key == data.key:
+            if request_hash == data.request_hash:
+                ticket: TicketEntity = await self.tickets_repository.get_ticket(
+                    data.ticket_id
+                )
+                return ticket.id
+            else:
+                raise ConflictError("Idempotency ключи одинаковы, но хеш данных разный")
+        return None
 
     async def delete(self, ticket_id: str) -> dict:
         try:

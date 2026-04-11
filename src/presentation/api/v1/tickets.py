@@ -21,6 +21,7 @@ async def create_tickets(
         last_name=request_data.last_name,
         email=request_data.email,
         seat=request_data.seat,
+        idempotency_key=request_data.idempotency_key,
     )
 
 

@@ -1,6 +1,11 @@
 import typing
 
-from src.domain.models import OutboxEntity, UserEntity, TicketEntity
+from src.domain.models import (
+    OutboxEntity,
+    UserEntity,
+    TicketEntity,
+    IdempotencyKeysEntity,
+)
 
 
 class TicketsRepositoryPort(typing.Protocol):
@@ -21,3 +26,9 @@ class TicketsRepositoryPort(typing.Protocol):
     async def get_outbox(self) -> list[OutboxEntity]: ...
 
     async def change_outbox_status(self, outbox_id: str) -> None: ...
+
+    async def set_idempotency(
+        self, idempotency_key: str, request_hash: str, ticket_id: str
+    ) -> None: ...
+
+    async def get_idempotency(self, idempotency_key: str) -> IdempotencyKeysEntity: ...
