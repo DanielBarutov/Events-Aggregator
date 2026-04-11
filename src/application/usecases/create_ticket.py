@@ -129,6 +129,8 @@ class TicketUsecase:
         data: IdempotencyKeysEntity = await self.tickets_repository.get_idempotency(
             idempotency_key
         )
+        if not data:
+            return None
         # Сверяем if idempotency_key == BD idempotency_key:
         if idempotency_key == data.key:
             if request_hash == data.request_hash:
