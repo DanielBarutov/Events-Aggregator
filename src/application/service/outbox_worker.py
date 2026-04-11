@@ -3,7 +3,7 @@ from collections.abc import Awaitable, Callable
 
 from src.domain.exceptions import AppError, BusinessLogicError
 from src.application.usecases.create_ticket import OutboxUsecase
-
+from src.infrastructure.db.session import AsyncSessionLocal
 
 import logging
 
@@ -15,8 +15,9 @@ async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]])
     try:
         while True:
             await asyncio.sleep(2)
-            usecase = await build_usecase()
-            await usecase.execute()
+            async with AsyncSessionLocal() as session:
+                usecase = await build_usecase(session)
+                await usecase.execute()
             await asyncio.sleep(60)
     except AppError:
         raise
