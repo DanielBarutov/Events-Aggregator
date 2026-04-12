@@ -254,13 +254,7 @@ class TicketsRepository:
             data = IdempotencyKeys(
                 key=idempotency_key, request_hash=request_hash, ticket_id=ticket_id
             )
-            logger.info(
-                f"Создан обьект идемпотености: {idempotency_key} : {request_hash} : {ticket_id}"
-            )
-            print(
-                f"Создан обьект идемпотености: {idempotency_key} : {request_hash} : {ticket_id}"
-            )
-            await self.session.add(data)
+            self.session.add(data)
             await self.session.commit()
             logger.info(
                 f"Записан ключ с данными: {idempotency_key} : {request_hash} : {ticket_id}"
