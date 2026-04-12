@@ -90,12 +90,12 @@ class SyncStatus(Base):
     last_sync_time = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
     last_changed_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
     sync_status = Column(Enum(SyncStatus), nullable=False)
 
@@ -110,7 +110,7 @@ class User(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
 
 
@@ -123,7 +123,7 @@ class Ticket(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
     user = relationship("User", foreign_keys=[user_id], back_populates="tickets")
 
@@ -137,7 +137,7 @@ class Outbox(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
 
 
@@ -150,5 +150,5 @@ class IdempotencyKeys(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        default=datetime.datetime.now(timezone_msk),
+        default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
