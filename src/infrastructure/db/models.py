@@ -146,7 +146,7 @@ class IdempotencyKeys(Base):
     id = Column(Integer, primary_key=True)
     key = Column(String, unique=True, nullable=False)
     request_hash = Column(String)
-    ticked_id = Column(String)
+    ticket_id = Column(String)
     created_at = Column(
         DateTime,
         nullable=False,
