@@ -148,7 +148,7 @@ class IdempotencyKeys(Base):
     request_hash = Column(String)
     ticket_id = Column(String)
     created_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
