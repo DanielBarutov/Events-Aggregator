@@ -275,7 +275,7 @@ class TicketsRepository:
                 id=idempotency_obj.id,
                 key=idempotency_obj.key,
                 request_hash=idempotency_obj.request_hash,
-                ticket_id=idempotency_obj.ticked_id,
+                ticket_id=idempotency_obj.ticket_id,
                 created_at=idempotency_obj.created_at,
             )
         except Exception as e:
