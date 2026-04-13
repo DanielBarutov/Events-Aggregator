@@ -34,6 +34,7 @@ class OutboxTypeEvent(enum.Enum):
 class OutboxStatus(enum.Enum):
     awaits = "awaits"
     sent = "sent"
+    fail = "fail"
 
 
 @dataclasses.dataclass
@@ -94,6 +95,7 @@ class OutboxEntity:
     type_event: OutboxTypeEvent
     payload: json
     status: OutboxStatus
+    retry: int
     created_at: datetime.datetime
 
 

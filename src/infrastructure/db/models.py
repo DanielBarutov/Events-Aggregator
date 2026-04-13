@@ -30,6 +30,7 @@ class TypeEvent(enum.Enum):
 class OutboxStatus(enum.Enum):
     awaits = "awaits"
     sent = "sent"
+    fail = "fail"
 
 
 class Base(DeclarativeBase):
@@ -134,6 +135,7 @@ class Outbox(Base):
     type_event = Column(Enum(TypeEvent), nullable=False)
     payload = Column(JSON, nullable=True)
     status = Column(Enum(OutboxStatus), nullable=False)
+    retry = Column(Integer, nullable=False, server_default="1")
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
