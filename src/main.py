@@ -3,8 +3,9 @@ import asyncio
 import logging
 
 from fastapi import FastAPI
+import sentry_sdk
 
-
+import src.setting
 from src.presentation.router import router
 from src.presentation.exception_handlers import register_exception_handlers
 from src.application.service.sync_worker import run_sync_loop
@@ -19,6 +20,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+sentry_sdk.init(
+    dsn=src.setting.SENTRY_DSN,
+    traces_sample_rate=1.0,
+)
 
 build_sync_usecase = make_build_sync_usecase()
 build_outbox_usecase = make_build_outbox_usecase()
