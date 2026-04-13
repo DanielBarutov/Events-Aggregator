@@ -7,12 +7,15 @@ from src.presentation.api.v1.tickets import router as tickets_router
 
 def test_create_ticket_endpoint_passes_request_body_to_usecase():
     class StubUsecase:
-        async def create(self, event_id, first_name, last_name, email, seat):
+        async def create(
+            self, event_id, first_name, last_name, email, seat, idempotency_key
+        ):
             assert event_id == "event-1"
             assert first_name == "Ivan"
             assert last_name == "Petrov"
             assert email == "ivan@test.com"
             assert seat == "A1"
+            assert idempotency_key == "123456qwe"
             return {"ticket_id": "t-1"}
 
     app = FastAPI()
@@ -28,6 +31,7 @@ def test_create_ticket_endpoint_passes_request_body_to_usecase():
             "last_name": "Petrov",
             "email": "ivan@test.com",
             "seat": "A1",
+            "idempotency_key": "123456qwe",
         },
     )
 

@@ -28,8 +28,8 @@ def test_get_events():
             provider = EventsProviderClient("http://api.example", "secret")
             data = await provider.get_events("http://api.example/api/events/")
 
-        assert data["next"] == "https://api.example/next"
-        assert data["previous"] == "https://api.example/prev"
+        assert data["next"] == "http://api.example/next"
+        assert data["previous"] == "http://api.example/prev"
         inner_client.get.assert_awaited_once()
         _, kwargs = inner_client.get.call_args
         assert kwargs["headers"] == {"x-api-key": "secret"}
