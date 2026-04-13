@@ -55,8 +55,10 @@ class TicketUsecase:
                 )
 
             if resolve:
-                ticket: TicketEntity = self.tickets_repository.get_ticket()
-                return {"ticket_id": ticket.id}
+                data: IdempotencyKeysEntity = (
+                    await self.tickets_repository.get_idempotency(idempotency_key)
+                )
+                return {"ticket_id": data.key}
 
             available_seats = await self.client.get_available_seats(event_id)
             if seat not in available_seats:
