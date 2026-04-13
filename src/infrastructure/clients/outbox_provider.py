@@ -13,16 +13,21 @@ class OutboxProviderClient:
         self.provider_key = provider_key
 
     async def execute(self, payload):
-        try:
-            async with httpx.AsyncClient() as client:
-                url = urljoin(self.base_url, "/api/notifications")
-                header = {
-                    "Content-Type": "application/json",
-                    "x-api-key": self.provider_key,
-                }
-                response = await client.post(url=url, headers=header, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                return data
-        except Exception as e:
-            raise e
+        async with httpx.AsyncClient() as client:
+            url = urljoin(self.base_url, "/api/notifications")
+            header = {
+                "Content-Type": "application/json",
+                "x-api-key": self.provider_key,
+            }
+            logger.info(f"Попытка отправить сообщение с: {url} : {header} : {payload}")
+
+            response = await client.request(
+                method="POST", url=url, headers=header, json=payload
+            )
+            logger.info(f"Запрос выполнен - {response}")
+
+            response.raise_for_status()
+            data = response.json()
+            logger.info(f"Data: - {data}")
+            print(data)
+            return data

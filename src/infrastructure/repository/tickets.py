@@ -217,16 +217,20 @@ class TicketsRepository:
         try:
             data = await self.session.execute(select(Outbox))
             outboxes = data.scalars().all()
-            return [
-                OutboxEntity(
-                    id=outbox.id,
-                    type_event=outbox.type_event,
-                    payload=outbox.payload,
-                    status=outbox.status,
-                    created_at=outbox.created_at,
-                )
-                for outbox in outboxes
-            ]
+            return (
+                [
+                    OutboxEntity(
+                        id=outbox.id,
+                        type_event=outbox.type_event,
+                        payload=outbox.payload,
+                        status=outbox.status,
+                        created_at=outbox.created_at,
+                    )
+                    for outbox in outboxes
+                ]
+                if outboxes
+                else None
+            )
         except Exception as e:
             raise e
 

@@ -11,21 +11,22 @@ logger = logging.getLogger(__name__)
 
 
 async def run_sync_loop(build_usecase: Callable[[], Awaitable[SyncEventsUsecase]]):
-    try:
-        while True:
-            await asyncio.sleep(60)
-            async with AsyncSessionLocal() as session:
+    while True:
+        logger.info("Задача авто синхронизации запущена и будет выполнена через 60 сек")
+        await asyncio.sleep(60)
+        async with AsyncSessionLocal() as session:
+            try:
                 usecase = await build_usecase(session)
                 await usecase.execute()
-            await asyncio.sleep(86390)
-    except AppError:
-        raise
-    except Exception as e:
-        logger.exception(
-            "Неизвестная ошибка асинхронной задачи при синхронизации",
-            extra={"usecase": usecase},
-        )
-        raise BusinessLogicError(
-            "Неизвестная ошибка асинхронной задачи при синхронизации",
-            details={"reason": str(e)},
-        )
+            except AppError:
+                raise
+            except Exception as e:
+                logger.exception(
+                    "Неизвестная ошибка асинхронной задачи при синхронизации",
+                    extra={"usecase": usecase},
+                )
+                raise BusinessLogicError(
+                    "Неизвестная ошибка асинхронной задачи при синхронизации",
+                    details={"reason": str(e)},
+                )
+        await asyncio.sleep(86390)

@@ -26,8 +26,8 @@ build_outbox_usecase = make_build_outbox_usecase()
 
 @contextlib.asynccontextmanager
 async def lifespan(_app: FastAPI):
-    task_sync = asyncio.create_task(run_sync_loop(build_sync_usecase))
     task_outbox = asyncio.create_task(run_outbox_loop(build_outbox_usecase))
+    task_sync = asyncio.create_task(run_sync_loop(build_sync_usecase))
     try:
         yield
     finally:
