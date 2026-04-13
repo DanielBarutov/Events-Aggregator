@@ -184,14 +184,13 @@ class OutboxUsecase:
 
     async def execute(self):
         result = await self.repository.get_outbox()
-        logger.info(result)
         if not result:
             logger.info("Result - None, поэтому skip")
             return
         for i in result:
             try:
                 await self.client.execute(i.payload)
-                logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
                 await self.repository.change_outbox_status(i.id)
+                logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
             except Exception as e:
                 raise e

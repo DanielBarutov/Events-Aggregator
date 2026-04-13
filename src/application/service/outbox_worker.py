@@ -23,5 +23,5 @@ async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]])
                 await usecase.execute()
             except Exception as e:
                 logger.exception("Возникла ошибка при работе outbox_worker", exc_info=e)
-                await asyncio.sleep(10)
+                await asyncio.sleep(5)
                 continue

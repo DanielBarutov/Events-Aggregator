@@ -19,14 +19,10 @@ class OutboxProviderClient:
                 "Content-Type": "application/json",
                 "x-api-key": self.provider_key,
             }
-            logger.info(f"Попытка отправить сообщение с: {url} : {header} : {payload}")
-
             response = await client.request(
                 method="POST", url=url, headers=header, json=payload
             )
             logger.info(f"Запрос выполнен - {response}")
-
-            response.raise_for_status()
             data = response.json()
             if response.status_code == 500:
                 logger.info("Был получен 500 игнорируем")
