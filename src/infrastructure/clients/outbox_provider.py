@@ -24,7 +24,7 @@ class OutboxProviderClient:
             )
             logger.info(f"Запрос выполнен - {response}")
             data = response.json()
-            if response.status_code == 500:
-                logger.info("Был получен 500 игнорируем")
+            if not response.is_success:
+                logger.info(f"Был получен {response.status_code} игнорируем")
                 return None
             return data
