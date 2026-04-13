@@ -7,7 +7,7 @@ class TicketCreateRequest(BaseModel):
     last_name: str
     email: str
     seat: str
-    idempotency_key: str | None
+    idempotency_key: str | None = None
 
 
 class TicketDeleteResponse(BaseModel):
