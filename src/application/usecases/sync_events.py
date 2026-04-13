@@ -35,6 +35,8 @@ class SyncEventsUsecase:
     async def execute(self) -> None:
         try:
             last_sync: SyncStatusEntity = await self.get_sync()
+            if last_sync.sync_status == "run":
+                return
             self.max_changed_at = last_sync.last_changed_at.astimezone(
                 datetime.timezone.utc
             )

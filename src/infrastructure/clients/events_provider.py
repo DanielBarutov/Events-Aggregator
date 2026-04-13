@@ -16,7 +16,6 @@ class EventsProviderClient:
         self.base_url = provider_url
         self.headers = {"x-api-key": provider_key}
         self.date = "data_from=2000-01-01"
-        self.cache = cache
 
     async def get_events(self, url: str, date: str | None = None) -> EventListDTO:
         try:
@@ -26,6 +25,14 @@ class EventsProviderClient:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
+                # Для локального тестирования:
+                local_test = 1
+                if local_test == 1:
+                    if data["next"]:
+                        data["next"] = data["next"].replace("http", "https")
+                    if data["previous"]:
+                        data["previous"] = data["previous"].replace("http", "https")
+                # Конец
                 return data
         except AppError:
             raise
