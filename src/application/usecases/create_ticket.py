@@ -189,8 +189,9 @@ class OutboxUsecase:
             return
         for i in result:
             try:
-                await self.client.execute(i.payload)
+                response = await self.client.execute(i.payload)
                 await self.repository.change_outbox_status(i.id)
-                logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
+                if response:
+                    logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
             except Exception as e:
                 raise e

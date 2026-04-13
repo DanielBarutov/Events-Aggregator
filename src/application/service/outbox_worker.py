@@ -11,12 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]]):
+    logger.info(
+        "Задача проверки не отправленных сообщений Outbox запущена и будет выполнена через 10 сек"
+    )
+    await asyncio.sleep(30)
+    usecase = None
     while True:
         async with AsyncSessionLocal() as session:
-            logger.info(
-                "Задача проверки не отправленных сообщений Outbox запущена и будет выполнена через 10 сек"
-            )
-            await asyncio.sleep(10)
             logger.info("Начало выполнение проверки не отправленных сообщений Outbox")
             try:
                 usecase = await build_usecase(session)
