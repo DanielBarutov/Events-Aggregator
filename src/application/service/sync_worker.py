@@ -2,7 +2,6 @@ import asyncio
 from collections.abc import Awaitable, Callable
 
 
-from src.domain.exceptions import AppError, BusinessLogicError
 from src.application.usecases.sync_events import SyncEventsUsecase
 from src.infrastructure.db.session import AsyncSessionLocal
 import logging
@@ -16,17 +15,11 @@ async def run_sync_loop(build_usecase: Callable[[], Awaitable[SyncEventsUsecase]
         await asyncio.sleep(60)
         async with AsyncSessionLocal() as session:
             try:
+                logger.info("Начата синхронизация ивентов ...")
                 usecase = await build_usecase(session)
                 await usecase.execute()
-            except AppError:
-                raise
+                await asyncio.sleep(86400)
             except Exception as e:
-                logger.exception(
-                    "Неизвестная ошибка асинхронной задачи при синхронизации",
-                    extra={"usecase": usecase},
-                )
-                raise BusinessLogicError(
-                    "Неизвестная ошибка асинхронной задачи при синхронизации",
-                    details={"reason": str(e)},
-                )
-        await asyncio.sleep(86390)
+                logger.exception("Возникла ошибка при работе sync_worker", exc_info=e)
+                await asyncio.sleep(5)
+                continue
