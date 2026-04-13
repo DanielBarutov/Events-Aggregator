@@ -246,7 +246,7 @@ class TicketsRepository:
                 )
             outbox.status = OutboxStatus.sent
             await self.session.commit()
-            await self.session.refresh()
+            await self.session.refresh(outbox)
         except Exception as e:
             await self.session.rollback()
             raise e
