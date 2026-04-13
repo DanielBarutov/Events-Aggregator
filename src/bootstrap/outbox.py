@@ -12,7 +12,7 @@ def make_build_outbox_usecase() -> Callable[[], Awaitable[OutboxUsecase]]:
         async with AsyncSessionLocal() as session:
             repository = TicketsRepository(session)
             client = OutboxProviderClient(
-                src.setting.EVENTS_PROVIDER_SERVER,
+                src.setting.NOTIFY_PRIVIDER_SERVER,
                 src.setting.EVENTS_PROVIDER_API_KEY,
             )
             return OutboxUsecase(repository, client)
