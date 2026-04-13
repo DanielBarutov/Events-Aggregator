@@ -1,7 +1,6 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 
-from src.domain.exceptions import AppError, BusinessLogicError
 from src.application.usecases.create_ticket import OutboxUsecase
 from src.infrastructure.db.session import AsyncSessionLocal
 
@@ -22,14 +21,7 @@ async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]])
             try:
                 usecase = await build_usecase(session)
                 await usecase.execute()
-            except AppError:
-                raise
             except Exception as e:
-                logger.exception(
-                    "Неизвестная ошибка асинхронной задачи при синхронизации",
-                    extra={"usecase": usecase},
-                )
-                raise BusinessLogicError(
-                    "Неизвестная ошибка асинхронной задачи при синхронизации",
-                    details={"reason": str(e)},
-                )
+                logger.exception("Возникла ошибка при работе outbox_worker", exc_info=e)
+                await asyncio.sleep(10)
+                continue

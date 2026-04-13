@@ -183,7 +183,6 @@ class OutboxUsecase:
         self.client = client
 
     async def execute(self):
-        logger.info("Начало работы OutboxUsecase")
         result = await self.repository.get_outbox()
         logger.info(result)
         if not result:

@@ -28,6 +28,7 @@ class OutboxProviderClient:
 
             response.raise_for_status()
             data = response.json()
-            logger.info(f"Data: - {data}")
-            print(data)
+            if response.status_code == 500:
+                logger.info("Был получен 500 игнорируем")
+                return None
             return data
