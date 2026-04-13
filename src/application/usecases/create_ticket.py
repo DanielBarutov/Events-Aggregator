@@ -46,6 +46,8 @@ class TicketUsecase:
         idempotency_key: str,
     ) -> dict:
         try:
+            resolve = None
+            request_hash = None
             if idempotency_key:
                 request_hash = self._generate_request_hash(
                     event_id, first_name, last_name, email, seat
@@ -58,7 +60,7 @@ class TicketUsecase:
                 data: IdempotencyKeysEntity = (
                     await self.tickets_repository.get_idempotency(idempotency_key)
                 )
-                return {"ticket_id": data.key}
+                return {"ticket_id": data.ticket_id}
 
             available_seats = await self.client.get_available_seats(event_id)
             if seat not in available_seats:
