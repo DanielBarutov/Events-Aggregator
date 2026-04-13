@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 async def run_sync_loop(build_usecase: Callable[[], Awaitable[SyncEventsUsecase]]):
     try:
         while True:
-            await asyncio.sleep(600)
+            await asyncio.sleep(60)
             async with AsyncSessionLocal() as session:
                 usecase = await build_usecase(session)
                 await usecase.execute()

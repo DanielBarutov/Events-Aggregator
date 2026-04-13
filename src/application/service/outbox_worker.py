@@ -14,11 +14,14 @@ logger = logging.getLogger(__name__)
 async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]]):
     try:
         while True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(60)
             async with AsyncSessionLocal() as session:
+                logger.info(
+                    "Начало выполнение проверки не отрпавленных сообщений Outbox"
+                )
                 usecase = await build_usecase(session)
                 await usecase.execute()
-            await asyncio.sleep(60)
+            await asyncio.sleep(30)
     except AppError:
         raise
     except Exception as e:
