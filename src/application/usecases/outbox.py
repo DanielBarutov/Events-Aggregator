@@ -25,10 +25,10 @@ class OutboxUsecase:
                 if i.retry <= 3:
                     await self.repository.add_retry(i.id)
                     response = await self.client.execute(i.payload)
-                    await self.repository.change_outbox_status(i.id, "sent")
                 else:
                     await self.repository.change_outbox_status(i.id, "fail")
                 if response:
+                    await self.repository.change_outbox_status(i.id, "sent")
                     logger.info(f"Сообщение с id: {i.id} в Capushino было доставлено!")
             except Exception as e:
                 logger.exception("Ошибка при обработке сообщений из Outbox")
