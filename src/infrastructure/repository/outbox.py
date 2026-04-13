@@ -13,7 +13,7 @@ class OutboxRepository:
     async def get_outbox(self) -> list[OutboxEntity] | None:
         try:
             data = await self.session.execute(
-                select(Outbox).where(OutboxStatus == "await")
+                select(Outbox).where(Outbox.status == "await")
             )
             outboxes = data.scalars().all()
             return (
