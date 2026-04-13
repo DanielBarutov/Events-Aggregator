@@ -18,11 +18,10 @@ async def run_outbox_loop(build_usecase: Callable[[], Awaitable[OutboxUsecase]])
     usecase = None
     while True:
         async with AsyncSessionLocal() as session:
-            logger.info("Начата проверка не отправленных сообщений Outbox ...")
             try:
                 usecase = await build_usecase(session)
                 await usecase.execute()
-                await asyncio.sleep(30)
+                await asyncio.sleep(20)
             except Exception as e:
                 logger.exception("Возникла ошибка при работе outbox_worker", exc_info=e)
                 await asyncio.sleep(5)

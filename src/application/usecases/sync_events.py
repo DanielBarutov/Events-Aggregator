@@ -77,7 +77,6 @@ class SyncEventsUsecase:
             await self.end()
 
     async def start_sync(self) -> None:
-        logger.info("Начата сихронизация")
         return await self.sync_repository.create(self.uuid, "run")
 
     async def get_sync(self) -> None:
