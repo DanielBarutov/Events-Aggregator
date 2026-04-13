@@ -98,9 +98,10 @@ class TicketUsecase:
                 await self.tickets_repository.create_ticket(
                     result.get("ticket_id"), user.id, event_id, seat, payload
                 )
-                await self.tickets_repository.set_idempotency(
-                    idempotency_key, request_hash, result.get("ticket_id")
-                )
+                if idempotency_key:
+                    await self.tickets_repository.set_idempotency(
+                        idempotency_key, request_hash, result.get("ticket_id")
+                    )
                 return result
 
         except AppError:
