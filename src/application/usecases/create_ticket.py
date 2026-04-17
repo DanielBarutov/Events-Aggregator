@@ -7,6 +7,7 @@ import json
 from src.application.ports.repo.tickets_repo import TicketsRepositoryPort
 from src.application.ports.repo.get_events_repo import GetEventsRepositoryPort
 from src.application.ports.event_provider_port import EventProviderPort
+from src.application.ports.metrics_port import MetricsPort
 from src.domain.models import (
     IdempotencyKeysEntity,
     TicketEntity,
@@ -30,10 +31,12 @@ class TicketUsecase:
         client: EventProviderPort,
         event_repository: GetEventsRepositoryPort,
         tickets_repository: TicketsRepositoryPort,
+        metrics: MetricsPort,
     ):
         self.client = client
         self.event_repository = event_repository
         self.tickets_repository = tickets_repository
+        self.metrics = metrics
 
     async def create(
         self,
@@ -105,6 +108,7 @@ class TicketUsecase:
                     await self.tickets_repository.set_idempotency(
                         idempotency_key, request_hash, result.get("ticket_id")
                     )
+                self.metrics.inc_tickets_created()
                 return result
 
         except AppError:
@@ -161,6 +165,7 @@ class TicketUsecase:
                 )
             await self.tickets_repository.delete_ticket(ticket_id)
             await self.client.delete_ticket(event_id, ticket_id)
+            self.metrics.inc_tickets_cancelled()
             return {"success": True}
         except AppError:
             raise

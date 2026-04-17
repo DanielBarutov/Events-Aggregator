@@ -1,0 +1,6 @@
+import typing
+
+
+class MetricsPort(typing.Protocol):
+    def inc_tickets_created(self) -> None: ...
+    def inc_tickets_cancelled(self) -> None: ...

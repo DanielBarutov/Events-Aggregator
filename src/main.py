@@ -12,7 +12,7 @@ from src.application.service.sync_worker import run_sync_loop
 from src.application.service.outbox_worker import run_outbox_loop
 from src.bootstrap.sync import make_build_sync_usecase
 from src.bootstrap.outbox import make_build_outbox_usecase
-
+from src.presentation.middlewares.metrics import metrics_middleware
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,5 +46,6 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.middleware("http")(metrics_middleware)
 register_exception_handlers(app)
 app.include_router(router)

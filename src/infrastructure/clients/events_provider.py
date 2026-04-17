@@ -1,4 +1,5 @@
 import logging
+import time
 from urllib.parse import urljoin
 
 import httpx
@@ -6,6 +7,12 @@ import httpx
 from src.domain.exceptions import ExternalProviderError, AppError, InputError
 from src.infrastructure.clients.dto.events import EventListDTO
 from src.infrastructure.clients.cache.memory import MemoryCache
+from src.infrastructure.observability.metrics import (
+    CACHE_HITS_TOTAL,
+    CACHE_MISSES_TOTAL,
+    EVENTS_PROVIDER_REQUESTS_TOTAL,
+    EVENTS_PROVIDER_REQUEST_DURATION_SECONDS,
+)
 
 logger = logging.getLogger(__name__)
 cache = MemoryCache()
@@ -21,11 +28,21 @@ class EventsProviderClient:
         try:
             if date:
                 self.date = f"data_from={date}"
+            start = time.perf_counter()
             async with httpx.AsyncClient(base_url=self.base_url, timeout=60) as client:
-                response = await client.get(url, headers=self.headers)
-                response.raise_for_status()
-                data = response.json()
-                return data
+                try:
+                    response = await client.get(url, headers=self.headers)
+                    response.raise_for_status()
+                    data = response.json()
+                    return data
+                finally:
+                    duration = time.perf_counter() - start
+                    EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
+                        endpoint="/api/events/", status=response.status_code
+                    )
+                    EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
+                        endpoint="/api/events/"
+                    ).observe(duration)
         except AppError:
             raise
         except Exception as e:
@@ -41,19 +58,34 @@ class EventsProviderClient:
         try:
             memory = cache.get(event_id)
             if memory:
+                CACHE_HITS_TOTAL.inc()
                 return memory
+            start = time.perf_counter()
             async with httpx.AsyncClient() as client:
-                url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
-                response = await client.get(url, headers=self.headers)
-                if response.status_code == 500:
-                    raise InputError(
-                        "Ошибка при запросе доступных мест",
-                        details={"reason": response.status_code},
+                try:
+                    url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
+                    response = await client.get(url, headers=self.headers)
+                    self.metrics.inc_cache_miss()
+                    if response.status_code == 500:
+                        raise InputError(
+                            "Ошибка при запросе доступных мест",
+                            details={"reason": response.status_code},
+                        )
+                    response.raise_for_status()
+                    data = response.json()
+                    CACHE_MISSES_TOTAL.inc()
+                    cache.set(event_id, data.get("seats"), 60)
+                    return data.get("seats")
+                finally:
+                    duration = time.perf_counter() - start
+                    EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
+                        endpoint="/api/events/{event_id}/seats",
+                        status=response.status_code,
                     )
-                response.raise_for_status()
-                data = response.json()
-                cache.set(event_id, data.get("seats"), 60)
-                return data.get("seats")
+                    EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
+                        endpoint="/api/events/{event_id}/seats"
+                    ).observe(duration)
+
         except AppError:
             raise
         except Exception as e:
@@ -70,21 +102,32 @@ class EventsProviderClient:
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ):
         try:
+            start = time.perf_counter()
             async with httpx.AsyncClient() as client:
-                url = urljoin(self.base_url, f"/api/events/{event_id}/register/")
-                response = await client.request(
-                    method="POST",
-                    url=url,
-                    headers=self.headers,
-                    json={
-                        "first_name": first_name,
-                        "last_name": last_name,
-                        "seat": seat,
-                        "email": email,
-                    },
-                )
-                response.raise_for_status()
-                return response.json()
+                try:
+                    url = urljoin(self.base_url, f"/api/events/{event_id}/register/")
+                    response = await client.request(
+                        method="POST",
+                        url=url,
+                        headers=self.headers,
+                        json={
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "seat": seat,
+                            "email": email,
+                        },
+                    )
+                    response.raise_for_status()
+                    return response.json()
+                finally:
+                    duration = time.perf_counter() - start
+                    EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
+                        endpoint="/api/events/{event_id}/register/",
+                        status=response.status_code,
+                    )
+                    EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
+                        endpoint="/api/events/{event_id}/register/"
+                    ).observe(duration)
         except AppError:
             raise
         except Exception as e:
@@ -105,16 +148,27 @@ class EventsProviderClient:
 
     async def delete_ticket(self, event_id: str, ticket_id: str):
         try:
+            start = time.perf_counter()
             async with httpx.AsyncClient() as client:
-                url = urljoin(self.base_url, f"/api/events/{event_id}/unregister/")
-                response = await client.request(
-                    method="DELETE",
-                    url=url,
-                    headers=self.headers,
-                    json={"ticket_id": ticket_id},
-                )
-                response.raise_for_status()
-                return response.json()
+                try:
+                    url = urljoin(self.base_url, f"/api/events/{event_id}/unregister/")
+                    response = await client.request(
+                        method="DELETE",
+                        url=url,
+                        headers=self.headers,
+                        json={"ticket_id": ticket_id},
+                    )
+                    response.raise_for_status()
+                    return response.json()
+                finally:
+                    duration = time.perf_counter() - start
+                    EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
+                        endpoint="/api/events/{event_id}/unregister/",
+                        status=response.status_code,
+                    )
+                    EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
+                        endpoint="/api/events/{event_id}/unregister/"
+                    ).observe(duration)
         except AppError:
             raise
         except Exception as e:

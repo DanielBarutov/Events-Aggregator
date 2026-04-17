@@ -6,6 +6,7 @@ from src.infrastructure.repository.tickets import TicketsRepository
 from src.infrastructure.repository.sync import SyncMetadataRepository
 from src.infrastructure.repository.events import EventsRepository
 from src.infrastructure.clients.events_provider import EventsProviderClient
+from src.infrastructure.observability.metrics_service import PrometheusMetricsService
 from src.infrastructure.db.session import get_session
 from src.application.usecases.create_ticket import TicketUsecase
 from src.application.usecases.get_events import (
@@ -61,4 +62,5 @@ def get_tickets_usecase(
     client = EventsProviderClient(
         src.setting.EVENTS_PROVIDER_SERVER, src.setting.EVENTS_PROVIDER_API_KEY
     )
-    return TicketUsecase(client, event_repository, tickets_repository)
+    metrics = PrometheusMetricsService
+    return TicketUsecase(client, event_repository, tickets_repository, metrics)

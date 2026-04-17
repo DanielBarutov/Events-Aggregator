@@ -48,7 +48,10 @@ class SyncMetadataRepository:
     async def get(self) -> SyncStatusEntity:
         try:
             result = await self.session.execute(
-                select(SyncStatus).order_by(SyncStatus.last_sync_time.desc()).limit(1)
+                select(SyncStatus)
+                .where(SyncStatus.sync_status == "completed")
+                .order_by(SyncStatus.last_sync_time.desc())
+                .limit(1)
             )
             data = result.scalar()
             if not data:

@@ -3,7 +3,7 @@ import uuid
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from src.domain.exceptions import DatabaseError, AppError, InputError, NotFoundError
@@ -99,4 +99,19 @@ class EventsRepository:
             )
             raise DatabaseError(
                 "Неизвестная ошибка при синхронизации", details={"reason": str(e)}
+            )
+
+    async def count_events(self) -> int:
+        try:
+            count = await self.session.execute(select(func.count(Event.id)))
+            return int(count.scalar())
+        except AppError:
+            raise
+        except Exception as e:
+            logger.exception(
+                "Неизвестная ошибка при подсчете событий",
+                extra={"reason": str(e)},
+            )
+            raise DatabaseError(
+                "Неизвестная ошибка при подсчете событий", details={"reason": str(e)}
             )

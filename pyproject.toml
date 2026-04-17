@@ -14,6 +14,7 @@ dependencies = [
     "fastapi-cache2>=0.2.2",
     "httpx>=0.28.1",
     "postgres>=4.0",
+    "prometheus-client>=0.25.0",
     "pydantic>=2.12.5",
     "pytest>=9.0.2",
     "requests>=2.33.0",
