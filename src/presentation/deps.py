@@ -62,5 +62,5 @@ def get_tickets_usecase(
     client = EventsProviderClient(
         src.setting.EVENTS_PROVIDER_SERVER, src.setting.EVENTS_PROVIDER_API_KEY
     )
-    metrics = PrometheusMetricsService
+    metrics = PrometheusMetricsService()
     return TicketUsecase(client, event_repository, tickets_repository, metrics)
