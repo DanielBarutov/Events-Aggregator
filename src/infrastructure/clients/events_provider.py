@@ -65,7 +65,6 @@ class EventsProviderClient:
                 try:
                     url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
                     response = await client.get(url, headers=self.headers)
-                    self.metrics.inc_cache_miss()
                     if response.status_code == 500:
                         raise InputError(
                             "Ошибка при запросе доступных мест",

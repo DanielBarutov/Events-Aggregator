@@ -7,9 +7,10 @@ from src.presentation.api.v1.sync import router as sync_router
 from src.presentation.api.v1.metrics import router as metrics_router
 
 router = APIRouter(prefix="/api")
+router_metrics = APIRouter()
 
 router.include_router(health_router)
 router.include_router(events_router)
 router.include_router(tickets_router)
 router.include_router(sync_router)
-router.include_router(metrics_router)
+router_metrics.include_router(metrics_router)

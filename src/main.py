@@ -6,7 +6,7 @@ from fastapi import FastAPI
 import sentry_sdk
 
 import src.setting
-from src.presentation.router import router
+from src.presentation.router import router, router_metrics
 from src.presentation.exception_handlers import register_exception_handlers
 from src.application.service.sync_worker import run_sync_loop
 from src.application.service.outbox_worker import run_outbox_loop
@@ -49,3 +49,4 @@ app = FastAPI(lifespan=lifespan)
 app.middleware("http")(metrics_middleware)
 register_exception_handlers(app)
 app.include_router(router)
+app.include_router(router_metrics)
