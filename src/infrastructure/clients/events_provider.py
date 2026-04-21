@@ -29,17 +29,19 @@ class EventsProviderClient:
             if date:
                 self.date = f"data_from={date}"
             start = time.perf_counter()
+            status_code: int | str = "network_error"
             async with httpx.AsyncClient(base_url=self.base_url, timeout=60) as client:
                 try:
                     response = await client.get(url, headers=self.headers)
+                    status_code = response.status_code
                     response.raise_for_status()
                     data = response.json()
                     return data
                 finally:
                     duration = time.perf_counter() - start
                     EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
-                        endpoint="/api/events/", status=response.status_code
-                    )
+                        endpoint="/api/events/", status=str(status_code)
+                    ).inc()
                     EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
                         endpoint="/api/events/"
                     ).observe(duration)
@@ -61,14 +63,16 @@ class EventsProviderClient:
                 CACHE_HITS_TOTAL.inc()
                 return memory
             start = time.perf_counter()
+            status_code: int | str = "network_error"
             async with httpx.AsyncClient() as client:
                 try:
                     url = urljoin(self.base_url, f"/api/events/{event_id}/seats/")
                     response = await client.get(url, headers=self.headers)
-                    if response.status_code == 500:
+                    status_code = response.status_code
+                    if status_code == 500:
                         raise InputError(
                             "Ошибка при запросе доступных мест",
-                            details={"reason": response.status_code},
+                            details={"reason": status_code},
                         )
                     response.raise_for_status()
                     data = response.json()
@@ -79,8 +83,8 @@ class EventsProviderClient:
                     duration = time.perf_counter() - start
                     EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
                         endpoint="/api/events/{event_id}/seats",
-                        status=response.status_code,
-                    )
+                        status=status_code,
+                    ).inc()
                     EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
                         endpoint="/api/events/{event_id}/seats"
                     ).observe(duration)
@@ -102,6 +106,7 @@ class EventsProviderClient:
     ):
         try:
             start = time.perf_counter()
+            status_code: int | str = "network_error"
             async with httpx.AsyncClient() as client:
                 try:
                     url = urljoin(self.base_url, f"/api/events/{event_id}/register/")
@@ -122,8 +127,8 @@ class EventsProviderClient:
                     duration = time.perf_counter() - start
                     EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
                         endpoint="/api/events/{event_id}/register/",
-                        status=response.status_code,
-                    )
+                        status=status_code,
+                    ).inc()
                     EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
                         endpoint="/api/events/{event_id}/register/"
                     ).observe(duration)
@@ -148,6 +153,7 @@ class EventsProviderClient:
     async def delete_ticket(self, event_id: str, ticket_id: str):
         try:
             start = time.perf_counter()
+            status_code: int | str = "network_error"
             async with httpx.AsyncClient() as client:
                 try:
                     url = urljoin(self.base_url, f"/api/events/{event_id}/unregister/")
@@ -157,14 +163,15 @@ class EventsProviderClient:
                         headers=self.headers,
                         json={"ticket_id": ticket_id},
                     )
+                    status_code = response.status_code
                     response.raise_for_status()
                     return response.json()
                 finally:
                     duration = time.perf_counter() - start
                     EVENTS_PROVIDER_REQUESTS_TOTAL.labels(
                         endpoint="/api/events/{event_id}/unregister/",
-                        status=response.status_code,
-                    )
+                        status=status_code,
+                    ).inc()
                     EVENTS_PROVIDER_REQUEST_DURATION_SECONDS.labels(
                         endpoint="/api/events/{event_id}/unregister/"
                     ).observe(duration)
@@ -199,5 +206,5 @@ class EventsPaginator:
         if self.next_page_url is None:
             raise StopAsyncIteration
         data = await self.client.get_events(self.next_page_url)
-        self.next_page_url = data.get("next")
-        return data.get("results", [])
+        self.next_page_url = data.next
+        return data.results
