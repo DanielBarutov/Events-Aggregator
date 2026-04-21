@@ -104,7 +104,8 @@ class EventsRepository:
     async def count_events(self) -> int:
         try:
             count = await self.session.execute(select(func.count(Event.id)))
-            return int(count.scalar())
+            result = count.scalar()
+            return int(result) if result is not None else 0
         except AppError:
             raise
         except Exception as e:

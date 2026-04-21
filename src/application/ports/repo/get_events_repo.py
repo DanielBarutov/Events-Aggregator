@@ -6,7 +6,7 @@ from src.domain.models import EventEntity, PlaceEntity
 
 class GetEventsRepositoryPort(typing.Protocol):
     async def get_events_with_places(
-        self, data_from: datetime.datetime | None = None
+        self, data_from: datetime.date | None = None
     ) -> list[EventEntity]: ...
 
     async def get_event(self, event_id: str) -> EventEntity: ...
