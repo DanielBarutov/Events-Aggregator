@@ -9,7 +9,7 @@ from src.domain.exceptions import AppError, CacheError
 logger = logging.getLogger(__name__)
 
 
-class MemoryCache():
+class MemoryCache:
     def __init__(self):
         self._storage: dict[str, tuple[typing.Any, float]] = {}
 
